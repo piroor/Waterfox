@@ -465,6 +465,8 @@ BrowserGlue.prototype = {
     this._firstWindowReady = new Promise(
       resolve => (this._firstWindowLoaded = resolve)
     );
+
+    WaterfoxGlue.init();
   },
 
   // cleanup (called on application shutdown)
@@ -500,8 +502,6 @@ BrowserGlue.prototype = {
   // (i.e. before the first window is opened)
   _beforeUIStartup: function BG__beforeUIStartup() {
     lazy.SessionStartup.init();
-
-    WaterfoxGlue.init();
 
     // check if we're in safe mode
     if (Services.appinfo.inSafeMode) {
