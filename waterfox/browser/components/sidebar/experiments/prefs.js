@@ -113,14 +113,6 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
           accesskey:  locale.get('preferences_faviconizePinnedTabs_accesskey'),
         }),
       ]),
-      element(document, XUL, 'vbox', { id: 'tabsSidebar_showTabPreviewBox' }, [
-        element(document, XUL, 'checkbox', {
-          id:         'tabsSidebar_showTabPreview',
-          preference: `${BASE_PREF}showTabPreview`,
-          label:      locale.get('preferences_showTabPreview_label'),
-          accesskey:  locale.get('preferences_showTabPreview_accesskey'),
-        }),
-      ]),
     ]));
 
     preferenceItems.appendChild(element(document, XUL, 'groupbox', {
@@ -747,7 +739,6 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
     for (const prefInfo of [
       { id: `${BASE_PREF}hideHorizontalTabsWhileActive`, type: 'bool' },
       { id: `${BASE_PREF}faviconizePinnedTabs`, type: 'bool' },
-      { id: `${BASE_PREF}showTabPreview`, type: 'bool' },
       { id: `${BASE_PREF}stickyActiveTab`, type: 'bool' },
       { id: `${BASE_PREF}stickySoundPlayingTab`, type: 'bool' },
       { id: `${BASE_PREF}stickySharingTab`, type: 'bool' },

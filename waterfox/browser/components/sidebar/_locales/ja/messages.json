@@ -1004,8 +1004,6 @@
   "tabsSidebarButton_label": { "message": "タブサイドバー" },
   "tabsSidebarButton_tooltiptext": { "message": "タブサイドバーの表示を切り替えます" },
   "openButton_tooltip": { "message": "タブサイドバーを開く" },
-  "tabsPreviewButton_tooltip": { "message": "プレビュー表示" },
-  "tabsListButton_tooltip": { "message": "リスト表示" },
   "optionsButton_tooltip": { "message": "タブサイドバーの設定を開く" },
   "closeButton_tooltip": { "message": "タブサイドバーを閉じる" },
 
@@ -1023,8 +1021,6 @@
   "preferences_hideHorizontalTabsWhileActive_label":     { "message": "タブサイドバーが表示されている間はタブバーを隠す" },
   "preferences_hideHorizontalTabsWhileActive_accesskey": { "message": "E" },
   "preferences_faviconizePinnedTabs_accesskey": { "message": "S" },
-  "preferences_showTabPreview_label": { "message": "タブにプレビューを表示する" },
-  "preferences_showTabPreview_accesskey": { "message": "R" },
   "config_autoStickyTab_caption":       { "message": "以下のタブが画面外にスクロールアウトしたときにタブバーの端に貼り付ける" },
   "config_stickyActiveTab_label":          { "message": "現在のタブ" },
   "preferences_stickyActiveTab_accesskey": { "message": "K" },

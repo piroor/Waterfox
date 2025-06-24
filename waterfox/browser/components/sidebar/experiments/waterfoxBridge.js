@@ -201,32 +201,6 @@ const BrowserWindowWatcher = {
       #tabs-sidebar-header toolbarbutton:hover {
         background: var(--toolbarbutton-hover-background);
       }
-      #tabs-sidebar-tabsViewBox {
-        background: rgba(0, 0, 0, 0.25);
-        border-radius: 0.2em;
-        line-height: 1;
-        padding: 1px;
-      }
-      #tabs-sidebar-tabsPreview,
-      #tabs-sidebar-tabsList {
-        border-radius: calc(0.2em - 1px);
-        margin: 0;
-      }
-      #tabs-sidebar-tabsPreview[checked="true"],
-      #tabs-sidebar-tabsList[checked="true"] {
-        background: var(--toolbar-bgcolor);
-      }
-      #tabs-sidebar-tabsPreview {
-        list-style-image: url("${this.BASE_URL}resources/icons/tabs-preview.svg");
-      }
-      #tabs-sidebar-tabsList {
-        border-radius: 0 0.2em 0.2em 0;
-        list-style-image: url("${this.BASE_URL}resources/icons/tabs-list.svg");
-      }
-      #tabs-sidebar-tabsPreview image,
-      #tabs-sidebar-tabsList image {
-        z-index: 100;
-      }
       #tabs-sidebar-options {
         appearance: none;
         list-style-image: url("chrome://global/skin/icons/settings.svg");
@@ -423,48 +397,13 @@ const BrowserWindowWatcher = {
     const width = Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'width') || 200;
     elements.appendChild(element(document, XUL, 'box', {
       id:    'tabs-sidebar-box',
-      class: 'chromeclass-extrachrome',
       orient: 'vertical',
-      style: `width: ${width}px;`,
-      width: width,
-      ...(shouldShowSidebar ? {} : { hidden: 'true' }),
+      slot:  'tabstrip',
     }, [
       element(document, XUL, 'hbox', {
         id:    'tabs-sidebar-header',
         align: 'center',
       }, [
-        element(document, XUL, 'hbox', { id: 'tabs-sidebar-tabsViewBox' }, [
-          element(document, XUL, 'toolbarbutton', {
-            id:    'tabs-sidebar-tabsPreview',
-            class: 'toolbarbutton-1',
-            tooltiptext: this.locale.get('tabsPreviewButton_tooltip'),
-            type:  'checkbox',
-          }, [
-            element(document, XUL, 'image', {
-              class: 'toolbarbutton-icon',
-            }),
-            element(document, XUL, 'label', {
-              class: 'toolbarbutton-text',
-              crop:  'end',
-              flex:  '1',
-            }),
-          ]),
-          element(document, XUL, 'toolbarbutton', {
-            id:    'tabs-sidebar-tabsList',
-            class: 'toolbarbutton-1',
-            tooltiptext: this.locale.get('tabsListButton_tooltip'),
-            type:  'checkbox',
-          }, [
-            element(document, XUL, 'image', {
-              class: 'toolbarbutton-icon',
-            }),
-            element(document, XUL, 'label', {
-              class: 'toolbarbutton-text',
-              crop:  'end',
-              flex:  '1',
-            }),
-          ]),
-        ]),
         element(document, XUL, 'spacer', {
           id:    'tabs-sidebar-spacer',
         }),
@@ -590,17 +529,9 @@ const BrowserWindowWatcher = {
       }),
     ]));
 
-    elements.appendChild(element(document, XUL, 'splitter', {
-      id:           'tabs-sidebar-splitter',
-      class:        'chromeclass-extrachrome sidebar-splitter',
-      resizebefore: 'sibling',
-      resizeafter:  'none',
-      ...(shouldShowSidebar ? {} : { hidden: 'true' }),
-    }));
-
-    const targetElement = document.querySelector('#tabbrowser-tabbox');
+    const targetElement = document.querySelector('#sidebar-main *|sidebar-main');
     if (targetElement) {
-      range.selectNode(targetElement);
+      range.selectNodeContents(targetElement);
       range.collapse(true);
       range.insertNode(elements);
     } else {
@@ -644,10 +575,8 @@ const BrowserWindowWatcher = {
     document.addEventListener('SidebarShown', this, { capture: true });
     document.addEventListener('popupshowing', this);
     document.addEventListener('command', this);
-    document.querySelector('#tabs-sidebar-splitter').addEventListener('mouseup', this);
     document.addEventListener('customizationchange', this, { capture: true });
 
-    this.updateTabsViewButtons(document);
     this.updateToggleButton(document);
     this.updateHorizontalTabsState(document);
 
@@ -701,11 +630,9 @@ const BrowserWindowWatcher = {
     document.removeEventListener('SidebarShown', this, { capture: true });
     document.removeEventListener('popupshowing', this);
     document.removeEventListener('command', this);
-    document.querySelector('#tabs-sidebar-splitter').removeEventListener('mouseup', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
     for (const node of document.querySelectorAll(`
-      #tabs-sidebar-splitter,
       #tabs-sidebar-box,
       /* Don't remove key element because only the first element added is effective.*/
       /*#toggle-tabs-sidebar-key,*/
@@ -852,7 +779,6 @@ const BrowserWindowWatcher = {
     const sidebarMainBox = win.document.querySelector('#sidebar-main');
     const sidebarBox = win.document.querySelector('#sidebar-box');
     const tabsSidebarBox = win.document.querySelector('#tabs-sidebar-box');
-    const tabsSidebarSplitter = win.document.querySelector('#tabs-sidebar-splitter');
 
     if (!FullScreen.__ws_orig__toggle)
       FullScreen.__ws_orig__toggle = FullScreen.toggle;
@@ -939,22 +865,12 @@ const BrowserWindowWatcher = {
           if (this.listeningToShow)
             return;
           this.listeningToShow = true;
-          tabsSidebarSplitter.addEventListener('mouseover', FullScreen.__ws_sidebar);
-          tabsSidebarSplitter.addEventListener('dragenter', FullScreen.__ws_sidebar);
-          tabsSidebarSplitter.addEventListener('touchmove', FullScreen.__ws_sidebar, {
-            passive: true,
-          });
         },
 
         endListenToShow() {
           if (!this.listeningToShow)
             return;
           this.listeningToShow = false;
-          tabsSidebarSplitter.removeEventListener('mouseover', FullScreen.__ws_sidebar);
-          tabsSidebarSplitter.removeEventListener('dragenter', FullScreen.__ws_sidebar);
-          tabsSidebarSplitter.removeEventListener('touchmove', FullScreen.__ws_sidebar, {
-            passive: true,
-          });
         },
 
         handleEvent(_event) {
@@ -988,19 +904,6 @@ const BrowserWindowWatcher = {
     if (FullScreen.__ws_sidebar) {
       FullScreen.__ws_sidebar.cleanup();
       FullScreen.__ws_sidebar = null;
-    }
-  },
-
-  updateTabsViewButtons(document) {
-    const previewButton = document.querySelector('#tabs-sidebar-tabsPreview');
-    const listButton    = document.querySelector('#tabs-sidebar-tabsList');
-    if (Services.prefs.getBoolPref(`${this.BASE_PREF}showTabPreview`, true)) {
-      previewButton.setAttribute('checked', true);
-      listButton.removeAttribute('checked');
-    }
-    else {
-      previewButton.removeAttribute('checked');
-      listButton.setAttribute('checked', true);
     }
   },
 
@@ -1103,13 +1006,10 @@ const BrowserWindowWatcher = {
 
   openTabsSidebar(document) {
     const box = document.querySelector('#tabs-sidebar-box');
-    const splitter = document.querySelector('#tabs-sidebar-splitter');
-    splitter.removeAttribute('hidden');
     box.setAttribute('shown', true);
     box.removeAttribute('hidden');
     Services.xulStore.persist(box, 'shown');
     Services.xulStore.removeValue(document.URL, box.id, 'hidden');
-    Services.xulStore.removeValue(document.URL, splitter.id, 'hidden');
 
     for (const listener of this.sidebarShownListeners) {
       listener(document.defaultView);
@@ -1118,13 +1018,10 @@ const BrowserWindowWatcher = {
 
   closeTabsSidebar(document) {
     const box = document.querySelector('#tabs-sidebar-box');
-    const splitter = document.querySelector('#tabs-sidebar-splitter');
     box.removeAttribute('shown');
     box.setAttribute('hidden', true);
-    splitter.setAttribute('hidden', true);
     Services.xulStore.removeValue(document.URL, box.id, 'shown');
     Services.xulStore.persist(box, 'hidden');
-    Services.xulStore.persist(splitter, 'hidden');
 
     for (const listener of this.sidebarHiddenListeners) {
       listener(document.defaultView);
@@ -1153,18 +1050,6 @@ const BrowserWindowWatcher = {
           case 'viewmenu-toggle-tabs-sidebar':
           case 'tabs-sidebar-close':
             this.toggleTabsToolbar(event.target.ownerDocument);
-            break;
-
-          case 'tabs-sidebar-tabsPreview':
-            Services.prefs.setBoolPref(`${this.BASE_PREF}showTabPreview`, true);
-            this.updateTabsViewButtons(event.target.ownerDocument);
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-tabsList':
-            Services.prefs.setBoolPref(`${this.BASE_PREF}showTabPreview`, false);
-            this.updateTabsViewButtons(event.target.ownerDocument);
-            this.tryHidePopup(event);
             break;
 
           case 'tabs-sidebar-moveLeft':

@@ -12,7 +12,6 @@ import * as Constants from './constants.js';
 
 const WATERFOX_SPECIFIC_VALUES = {
   hideHorizontalTabsWhileActive: true,
-  showTabPreview: true,
 
   sidebarPosition: Constants.kTABBAR_POSITION_LEFT,
   suppressGapFromShownOrHiddenToolbarOnlyOnMouseOperation: false,

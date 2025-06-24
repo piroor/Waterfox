@@ -1010,8 +1010,6 @@
   "tabsSidebarButton_label": { "message": "Tabs Sidebar" },
   "tabsSidebarButton_tooltiptext": { "message": "Toggle Tabs Sidebar" },
   "openButton_tooltip": { "message": "Show Tabs Sidebar" },
-  "tabsPreviewButton_tooltip": { "message": "Preview" },
-  "tabsListButton_tooltip": { "message": "List" },
   "optionsButton_tooltip": { "message": "Open Tabs Sidebar Options" },
   "closeButton_tooltip": { "message": "Close Tabs Sidebar" },
 
@@ -1029,8 +1027,6 @@
   "preferences_hideHorizontalTabsWhileActive_label":     { "message": "Hide tab bar while tabs sidebar is active" },
   "preferences_hideHorizontalTabsWhileActive_accesskey": { "message": "e" },
   "preferences_faviconizePinnedTabs_accesskey": { "message": "S" },
-  "preferences_showTabPreview_label": { "message": "Show preview in each tab" },
-  "preferences_showTabPreview_accesskey": { "message": "r" },
   "config_autoStickyTab_caption":       { "message": "Tabs sticked to edges of the tab bar when they are scrolled out" },
   "config_stickyActiveTab_label":          { "message": "Active Tab" },
   "preferences_stickyActiveTab_accesskey": { "message": "k" },

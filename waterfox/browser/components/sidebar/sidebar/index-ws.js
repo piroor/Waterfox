@@ -14,7 +14,6 @@ import * as Sidebar from './sidebar.js';
 import './tab-context-menu.js';
 import './tab-preview-tooltip.js';
 import './tab-preview.js';
-import './workaround-for-bug-1875100.js';
 
 import * as EventUtils from './event-utils.js';
 
