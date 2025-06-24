@@ -1,12 +1,15 @@
-import * as TabsStore from "/common/tabs-store.js";
+/*
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
+'use strict';
 
-browser.waterfoxBridge.onWindowVisibilityChanged.addListener(
-  (windowId, visibilityState) => {
-    if (windowId !== TabsStore.getCurrentWindowId()) return;
+import * as TabsStore from '/common/tabs-store.js';
 
-    document.documentElement.classList.toggle(
-      "minimized",
-      visibilityState === "hidden"
-    );
-  }
-);
+browser.waterfoxBridge.onWindowVisibilityChanged.addListener((windowId, visibilityState) => {
+  if (windowId != TabsStore.getCurrentWindowId())
+    return;
+
+  document.documentElement.classList.toggle('minimized', visibilityState == 'hidden');
+});
