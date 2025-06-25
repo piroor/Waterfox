@@ -430,6 +430,9 @@ export var PlacesUtils = {
   // Used to track the action that populated the clipboard.
   TYPE_X_MOZ_PLACE_ACTION: "text/x-moz-place-action",
 
+  // Used to track actouns from the Tree Vertical Tabs sidebar.
+  TYPE_X_WS_TREE: "application/x-ws-tree",
+
   // Deprecated: Remaining only for supporting migration of old livemarks.
   LMANNO_FEEDURI: "livemark/feedURI",
   LMANNO_SITEURI: "livemark/siteURI",

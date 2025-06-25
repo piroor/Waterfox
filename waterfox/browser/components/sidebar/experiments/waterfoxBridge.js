@@ -46,8 +46,6 @@ function element(document, NS, localName, attributes, children) {
 const BrowserWindowWatcher = {
   WATCHING_URLS: [
     'chrome://browser/content/browser.xhtml',
-    'chrome://browser/content/places/bookmarksSidebar.xhtml',
-    'chrome://browser/content/places/places.xhtml',
   ],
   BASE_URL: null, // this need to be replaced with "moz-extension://..../"
   BASE_PREF: 'browser.sidebar.', // null,
@@ -73,24 +71,11 @@ const BrowserWindowWatcher = {
     if (win.location.href.startsWith('chrome://browser/content/browser.xhtml')) {
       const installed = this.installTabsSidebar(win);
       if (installed) {
-        this.patchToTabHoverPreviewModules(win);
-        this.patchToPlacesModules(win);
         win.addEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.addEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.addEventListener('visibilitychange', this);
-        const sidebar = win.document?.querySelector('#sidebar');
-        if (sidebar?.contentWindow?.PlacesControllerDragHelper) {
-          this.patchToPlacesModules(sidebar.contentWindow);
-        }
       }
       return installed;
-    }
-    else if (win.location.href.startsWith('chrome://browser/content/places/')) {
-      const loaded = !!win.PlacesControllerDragHelper;
-      if (loaded) {
-        this.patchToPlacesModules(win);
-      }
-      return loaded;
     }
 
     return true;
@@ -108,23 +93,9 @@ const BrowserWindowWatcher = {
     if (win.location.href.startsWith('chrome://browser/content/browser.xhtml')) {
       this.uninstallTabsSidebar(win);
       try {
-        this.unpatchTabHoverPreviewModules(win);
-        this.unpatchPlacesModules(win);
         win.removeEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.removeEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.removeEventListener('visibilitychange', this);
-        const sidebar = win.document?.querySelector('#sidebar');
-        // Only unpatch if it seems to be a Places-related sidebar that would have been patched
-        if (sidebar?.contentWindow?.PlacesControllerDragHelper) { // Or check a flag set during patching
-          this.unpatchPlacesModules(sidebar.contentWindow);
-        }
-      }
-      catch(_error) {
-      }
-    }
-    else if (win.location.href.startsWith('chrome://browser/content/places/')) {
-      try {
-        this.unpatchPlacesModules(win);
       }
       catch(_error) {
       }
@@ -173,8 +144,6 @@ const BrowserWindowWatcher = {
       console.error('WaterfoxBridge: #tree-tabs element not found. Cannot attach event listeners or load panel.');
     }
 
-    document.addEventListener('SidebarShown', this, { capture: true });
-    document.addEventListener('popupshowing', this);
     document.addEventListener('command', this);
     document.addEventListener('customizationchange', this, { capture: true });
 
@@ -194,18 +163,6 @@ const BrowserWindowWatcher = {
     return this.lastTransferredFiles[this.getKeyFromFile(file)];
   },
 
-  sanitizeMenuLabel(label) {
-    return label.replace(/\(&[a-z0-9]\)$/i, '').replace(/&([a-z0-9])/i, '$1');
-  },
-
-  extractAccessKey(label) {
-    if (/\(&([a-z0-9])\)$/i.test(label) ||
-        /&([a-z0-9])/i.test(label))
-      return RegExp.$1;
-
-    return null;
-  },
-
   shouldShowSidebar(document) {
     // it should be hidden by default, as a built-in feature of Waterfox
     return Services.xulStore.getValue(document.URL, 'tree-tabs-box', 'hidden') != 'true';
@@ -214,145 +171,12 @@ const BrowserWindowWatcher = {
   uninstallTabsSidebar(win) {
     const document = win.document;
 
-    win.CustomTitlebar.allowedBy('TabsSidebar', true);
-
-    document.removeEventListener('SidebarShown', this, { capture: true });
-    document.removeEventListener('popupshowing', this);
     document.removeEventListener('command', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
     const tabsSidebarElement = document.querySelector('#tree-tabs');
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('src', 'about:blank');
-    }
-  },
-
-  patchToPlacesModules(win) {
-    if (!win.PlacesControllerDragHelper.__ws_orig__getMostRelevantFlavor)
-      win.PlacesControllerDragHelper.__ws_orig__getMostRelevantFlavor = win.PlacesControllerDragHelper.getMostRelevantFlavor;
-    win.PlacesControllerDragHelper.getMostRelevantFlavor = function(flavours) {
-      if (flavours.contains(TYPE_TREE))
-        return TYPE_TREE;
-
-      return this.__ws_orig__getMostRelevantFlavor(flavours);
-    };
-
-    if (!win.PlacesControllerDragHelper.__ws_orig__canDrop)
-      win.PlacesControllerDragHelper.__ws_orig__canDrop = win.PlacesControllerDragHelper.canDrop;
-    win.PlacesControllerDragHelper.canDrop = function(insertionPoint, dataTransfer) {
-      if (dataTransfer.mozTypesAt(0).contains(TYPE_TREE))
-        return true;
-
-      return this.__ws_orig__canDrop(insertionPoint, dataTransfer);
-    };
-  },
-
-  unpatchPlacesModules(win) {
-    if (win.PlacesControllerDragHelper.__ws_orig__getMostRelevantFlavor) {
-      win.PlacesControllerDragHelper.getMostRelevantFlavor = win.PlacesControllerDragHelper.__ws_orig__getMostRelevantFlavor;
-      win.PlacesControllerDragHelper.__ws_orig__getMostRelevantFlavor = null;
-    }
-
-    if (win.PlacesControllerDragHelper.__ws_orig__canDrop) {
-      win.PlacesControllerDragHelper.canDrop = win.PlacesControllerDragHelper.__ws_orig__canDrop;
-      win.PlacesControllerDragHelper.__ws_orig__canDrop = null;
-    }
-  },
-
-  patchToTabHoverPreviewModules(win) {
-    const tabs = win.document.getElementById('tabbrowser-tabs');
-    if (!tabs)
-      return;
-
-    if (!tabs._previewPanel) {
-      // https://searchfox.org/mozilla-esr128/rev/7998c47697fb3ba3e380eda1281c8280da81a0b1/browser/components/tabbrowser/content/tabs.js#187
-      const TabHoverPreviewPanel = ChromeUtils.importESModule('chrome://browser/content/tabbrowser/tab-hover-preview.mjs').default;
-      tabs._previewPanel = new TabHoverPreviewPanel(win.document.getElementById('tab-preview-panel'));
-    }
-
-    const tabPreview = tabs._previewPanel;
-    if (!tabPreview ||
-        !tabPreview.activate)
-      return;
-
-    tabPreview.__ws__calculateCoordinates = () => {
-      const tabsSidebar = win.document.querySelector('#tree-tabs');
-      const tabsSidebarRect = tabsSidebar.getBoundingClientRect();
-      const align = win.document.documentElement.classList.contains('tree-tabs-right') ? 'right' : 'left';
-      const previewRect = tabPreview._panel.getBoundingClientRect();
-      const x = align == 'left' ?
-        tabsSidebar.screenX + tabsSidebarRect.width - 2 :
-        tabsSidebar.screenX - previewRect.width + 2;
-      const y = Math.min(tabsSidebar.screenY + tabPreview.__ws__top, tabsSidebar.screenY + tabsSidebarRect.height - previewRect.height);
-      return [x, y];
-    };
-
-    if (!tabPreview.__ws_orig__activate)
-      tabPreview.__ws_orig__activate = tabPreview.activate;
-    // https://searchfox.org/mozilla-esr128/rev/7998c47697fb3ba3e380eda1281c8280da81a0b1/browser/components/tabbrowser/content/tab-hover-preview.mjs#97
-    const self = this;
-    tabPreview.activate = function(tab) {
-      if (this._isDisabled()) {
-        return;
-      }
-      this._tab = tab;
-      this._movePanel();
-
-      this._thumbnailElement = null;
-      this._maybeRequestThumbnail();
-      if (this._panel.state == 'open') {
-        this._updatePreview();
-      }
-      if (this._timer) {
-        return;
-      }
-      this._timer = this._win.setTimeout(() => {
-        this._timer = null;
-        if (self.shouldShowSidebar(win.document) &&
-            typeof this.__ws__top == 'number') {
-          const [x, y] = tabPreview.__ws__calculateCoordinates();
-          this._panel.openPopupAtScreen(x, y, false);
-        }
-        else {
-          this._panel.openPopup(this._tab, {
-            // POPUP_OPTIONS https://searchfox.org/mozilla-esr128/rev/7998c47697fb3ba3e380eda1281c8280da81a0b1/browser/components/tabbrowser/content/tab-hover-preview.mjs#9
-            position: 'bottomleft topleft',
-            x: 0,
-            y: -2,
-          });
-        }
-      }, this._prefPreviewDelay);
-      this._win.addEventListener('TabSelect', this);
-      this._panel.addEventListener('popupshowing', this);
-    };
-
-    if (!tabPreview._panel.__ws_orig__moveToAnchor)
-      tabPreview._panel.__ws_orig__moveToAnchor = tabPreview._panel.moveToAnchor;
-    tabPreview._panel.moveToAnchor = function(...args) {
-      if (self.shouldShowSidebar(win.document) &&
-          typeof tabPreview.__ws__top == 'number') {
-        const [x, y] = tabPreview.__ws__calculateCoordinates();
-        this.moveTo(x, y);
-        return;
-      }
-      return this.__ws_orig__moveToAnchor(...args);
-    };
-  },
-
-  unpatchTabHoverPreviewModules(win) {
-    const tabPreview = win.document.getElementById('tabbrowser-tabs')?._previewPanel;
-    if (!tabPreview ||
-        !tabPreview.activate)
-      return;
-
-    if (tabPreview.__ws_orig__activate) {
-      tabPreview.activate = tabPreview.__ws_orig__activate;
-      tabPreview.__ws_orig__activate = null;
-    }
-
-    if (tabPreview._panel?.__ws_orig__moveToAnchor) {
-      tabPreview._panel.moveToAnchor = tabPreview._panel.__ws_orig__moveToAnchor;
-      tabPreview._panel.__ws_orig__moveToAnchor = null;
     }
   },
 
@@ -467,16 +291,7 @@ const BrowserWindowWatcher = {
           case 'viewmenu-toggle-tree-tabs':
             this.toggleTabsToolbar(event.target.ownerDocument);
             break;
-
-          case 'tree-tabs-moreOptions':
-            this.openOptions(win, event.shiftKey);
-            this.tryHidePopup(event);
-            break;
         }
-        break;
-
-      case 'mouseup':
-        Services.xulStore.persist(event.target.ownerDocument.querySelector('#tree-tabs-box'), 'width');
         break;
 
       case 'customizationchange':
@@ -823,11 +638,21 @@ this.waterfoxBridge = class extends ExtensionAPI {
             return;
 
           const document = tab.nativeTab.ownerDocument;
-          const tabPreview = document.getElementById('tabbrowser-tabs')?._previewPanel;
-          if (!tabPreview)
+          const tabbrowserTabs = document.getElementById('tabbrowser-tabs');
+          if (!tabbrowserTabs)
             return;
-          tabPreview.__ws__top = top;
-          tabPreview.activate(tab.nativeTab);
+
+          if (!tabbrowserTabs.previewPanel) {
+            // load the tab preview component
+            const TabHoverPreviewPanel = ChromeUtils.importESModule(
+              'chrome://browser/content/tabbrowser/tab-hover-preview.mjs'
+            ).default;
+            tabbrowserTabs.previewPanel = new TabHoverPreviewPanel(
+              document.getElementById('tab-preview-panel')
+            );
+          }
+          tabbrowserTabs.previewPanel.__ws__top = top;
+          tabbrowserTabs.previewPanel.activate(tab.nativeTab);
         },
 
         async hidePreviewPanel(windowId) {
@@ -838,7 +663,7 @@ this.waterfoxBridge = class extends ExtensionAPI {
           try {
             // Access the document through the window object
             const document = win.window.document;
-            const tabPreview = document.getElementById('tabbrowser-tabs')?._previewPanel;
+            const tabPreview = document.getElementById('tabbrowser-tabs')?.previewPanel;
             if (!tabPreview)
               return;
             tabPreview.__ws__top = null;
