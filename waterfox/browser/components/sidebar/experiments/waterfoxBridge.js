@@ -361,6 +361,8 @@ const BrowserWindowWatcher = {
     if (!button)
       return;
 
+    button.removeAttribute('disabled');
+
     const viewMenuItem = document.querySelector('#viewmenu-toggle-tree-tabs');
     if (this.shouldShowSidebar(document)) {
       button.setAttribute('checked', true);
@@ -507,74 +509,6 @@ const BrowserWindowWatcher = {
   tryHidePopup(event) {
     if (event.target.closest)
       event.target.closest('panel')?.hidePopup();
-  },
-
-  moveToolbarButtonToDefaultPosition() {
-    try {
-      const rawState = Services.prefs.getStringPref('browser.uiCustomization.state', '{}');
-      if (!rawState)
-        return false;
-
-      const state = JSON.parse(rawState);
-      if (!state?.placements)
-        return false;
-
-      let foundInNavBar = false;
-      let found = false;
-      for (const [name, items] of Object.entries(state.placements)) {
-        if (!items.includes(this.id))
-          continue;
-        if (name == 'nav-bar')
-          foundInNavBar = true;
-        found = true;
-        break;
-      }
-
-      const navBarItems = state.placements['nav-bar'];
-      const searchIndex = navBarItems.indexOf('search-container');
-      const urlbarIndex = navBarItems.indexOf('urlbar-container');
-      const extensionsIndex = navBarItems.indexOf('unified-extensions-button');
-      const index = searchIndex > -1 ? searchIndex + 1 :
-        urlbarIndex > -1 ? urlbarIndex + 1 :
-          extensionsIndex > -1 ? extensionsIndex :
-            navBarItems.length;
-
-      if (foundInNavBar)
-        lazy.CustomizableUI.moveWidgetWithinArea(this.id, index);
-      else if (!found)
-        lazy.CustomizableUI.addWidgetToArea(this.id, this.defaultArea, index);
-
-      const win = Services.wm.getMostRecentBrowserWindow();
-      win.setTimeout(() => {
-        if (win.document.getElementById(this.id))
-          return;
-        console.log('failed to insert tabs sidebar button due to unhandled error in CustomizableUI module: retrying with reset');
-        win.gCustomizeMode.reset();
-      }, 250); // for safety, this delay need to be large enough
-
-      return true;
-    }
-    catch (error) {
-      console.log('failed to insert tabs sidebar button: ', error);
-    }
-    return false;
-  },
-
-  onPrefChanged(name) {
-    switch (name) {
-      case 'browser.uiCustomization.state': {
-        if (!Services.prefs.getStringPref(name)) { // resetting!
-          const tryInsertButton = () => {
-            if (!Services.prefs.getStringPref(name)) {
-              Services.wm.getMostRecentBrowserWindow().setTimeout(tryInsertButton, 10);
-              return;
-            }
-            this.moveToolbarButtonToDefaultPosition();
-          };
-          tryInsertButton();
-        }
-      }; break;
-    }
   },
 
   // as an XPCOM component...
@@ -743,7 +677,6 @@ this.waterfoxBridge = class extends ExtensionAPI {
             default:  context.extension.localeData.messages.get(context.extension.localeData.defaultLocale),
             selected: context.extension.localeData.messages.get(context.extension.localeData.selectedLocale),
           };
-          Services.prefs.addObserver('', BrowserWindowWatcher);
 
           //const resourceURI = Services.io.newURI('resources', null, context.extension.rootURI);
           //const handler = Cc['@mozilla.org/network/protocol;1?name=resource'].getService(Components.interfaces.nsISubstitutingProtocolHandler);
@@ -776,12 +709,6 @@ this.waterfoxBridge = class extends ExtensionAPI {
               break;
             BrowserWindowWatcher.handleWindow(win.value);
           }
-
-          // add toolbar button
-          lazy.CustomizableUI.createWidget(BrowserWindowWatcher);
-          if (!Services.prefs.getBoolPref(`${BrowserWindowWatcher.BASE_PREF}toolbarButtonInserted`, false) &&
-              BrowserWindowWatcher.moveToolbarButtonToDefaultPosition())
-            Services.prefs.setBoolPref(`${BrowserWindowWatcher.BASE_PREF}toolbarButtonInserted`, true);
 
           // support drag and drop of tabs from sidebar to bookmarks toolbar
           if (!lazy.PlacesUtils.__ws_orig__unwrapNodes)
