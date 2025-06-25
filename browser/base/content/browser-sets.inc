@@ -111,6 +111,8 @@
 #ifdef XP_MACOSX
     <command id="zoomWindow" data-l10n-id="window-zoom-command" />
 #endif
+
+    <command id="toggle-tree-tabs-command"/>
   </commandset>
 #include ../../components/places/content/placesCommands.inc.xhtml
 
@@ -403,4 +405,8 @@
          modifiers="accel,alt"
          internal="true"/>
 #endif
+
+    <key id="toggle-tree-tabs-key"
+         keycode="VK_F1"
+         command="toggle-tree-tabs-command"/>
   </keyset>

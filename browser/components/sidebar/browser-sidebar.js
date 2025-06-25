@@ -369,7 +369,8 @@ var SidebarController = {
       ) {
         // registerExtension() already creates menu items for extensions.
         const menuitem = this.createMenuItem(commandID, sidebar);
-        menubar.appendChild(menuitem);
+        //menubar.appendChild(menuitem);
+        menubar.insertBefore(menuitem, menubar.querySelector('#viewmenu-tree-tabs-separator'));
       }
     }
     if (this._mainResizeObserver) {

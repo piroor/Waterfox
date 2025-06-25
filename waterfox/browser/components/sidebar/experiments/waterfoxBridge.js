@@ -134,77 +134,12 @@ const BrowserWindowWatcher = {
   installTabsSidebar(win) {
     const document = win.document;
 
-    if (document.querySelector('#tree-tabs-style'))
+    const tabsSidebarElement = document.querySelector('#tree-tabs');
+    if (tabsSidebarElement?.getAttribute('initialized') == 'true')
       return true;
 
-    const range = document.createRange();
-
-    range.selectNode(document.head);
-    range.collapse(false);
-    range.insertNode(element(document, HTML, 'style', {
-      id: 'tree-tabs-style',
-    }, [`
-      /* toolbar button */
-      #toggle-tree-tabs {
-        list-style-image: url("${this.BASE_URL}resources/16x16.svg#toolbar-context");
-      }
-      #toggle-tree-tabs image {
-        -moz-context-properties: fill, fill-opacity;
-        color: inherit;
-        fill: currentColor;
-        min-height: 16px;
-        min-width: 16px;
-      }
-
-      /* tabs sidebar box */
-      #tree-tabs-box {
-        background-color: var(--sidebar-background-color);
-        color: var(--sidebar-text-color);
-        text-shadow: none;
-        min-width: 50px;
-      }
-      :root[BookmarksToolbarOverlapsBrowser] #tree-tabs-box {
-        padding-top: var(--bookmarks-toolbar-overlapping-browser-height);
-      }
-
-      #tree-tabs {
-        flex: 1;
-      }
-    `.trim()]));
-
-    // Note: keyboard shortcuts defined by XUL command/key become unavailable after
-    // they are removed and re-insertedby reloading of this addon. For consistensy
-    // it may need to be implemented without XUL elements...
-    document.querySelector('#mainCommandSet').appendChild(element(document, XUL, 'command', {
-      id: 'toggle-tree-tabs-command',
-    }));
-    // So, as a workaround we don't remove the key element on uninstallation and reuse existing key element.
-    if (!document.querySelector('#toggle-tree-tabs-key')) {
-      document.querySelector('#mainKeyset').appendChild(element(document, XUL, 'key', {
-        id:      'toggle-tree-tabs-key',
-        keycode: 'VK_F1',
-        command: 'toggle-tree-tabs-command',
-      }));
-    }
-
-    document.querySelector('#viewSidebarMenu').appendChild(element(document, XUL, 'menuseparator', {
-      id: 'viewmenu-tree-tabs-separator',
-    }));
-    document.querySelector('#viewSidebarMenu').appendChild(element(document, XUL, 'menuitem', {
-      id:    'viewmenu-toggle-tree-tabs',
-      type:  'checkbox',
-      label: this.locale.get('tabsSidebarButton_label'),
-      key:   'toggle-tree-tabs-key',
-    }));
-
-    const elements = document.createDocumentFragment();
-
-    const shouldShowSidebar = this.shouldShowSidebar(document);
-
-    const width = Services.xulStore.getValue(document.URL, 'tree-tabs-box', 'width') || 200;
-
-    const tabsSidebarElement = document.querySelector('#tree-tabs');
     if (tabsSidebarElement) {
+      tabsSidebarElement.setAttribute('initialized', 'true');
       tabsSidebarElement.setAttribute('src', 'chrome://browser/content/webext-panels.xhtml');
 
       tabsSidebarElement.addEventListener('load', () => {
@@ -289,17 +224,6 @@ const BrowserWindowWatcher = {
     const tabsSidebarElement = document.querySelector('#tree-tabs');
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('src', 'about:blank');
-    }
-
-    for (const node of document.querySelectorAll(`
-      /* Don't remove key element because only the first element added is effective.*/
-      /*#toggle-tree-tabs-key,*/
-      #toggle-tree-tabs-command,
-      #viewmenu-tree-tabs-separator,
-      #viewmenu-toggle-tree-tabs,
-      #tree-tabs-style
-    `)) {
-      node.parentNode.removeChild(node);
     }
   },
 
@@ -440,12 +364,10 @@ const BrowserWindowWatcher = {
     const viewMenuItem = document.querySelector('#viewmenu-toggle-tree-tabs');
     if (this.shouldShowSidebar(document)) {
       button.setAttribute('checked', true);
-      button.setAttribute('tooltiptext', this.locale.get('closeButton_tooltip'));
       viewMenuItem.setAttribute('checked', true);
     }
     else {
       button.removeAttribute('checked');
-      button.setAttribute('tooltiptext', this.locale.get('openButton_tooltip'));
       viewMenuItem.removeAttribute('checked');
     }
   },
@@ -636,45 +558,6 @@ const BrowserWindowWatcher = {
       console.log('failed to insert tabs sidebar button: ', error);
     }
     return false;
-  },
-
-  // behave as a toolbar customization widget
-  id: 'toggle-tree-tabs',
-  type: 'custom',
-  source: 'external',
-  removable: true,
-  get label() {
-    return this.locale.get('tabsSidebarButton_label');
-  },
-  get tooltiptext() {
-    return this.locale.get('tabsSidebarButton_tooltiptext');
-  },
-  defaultArea: lazy.CustomizableUI.AREA_NAVBAR,
-  showInPrivateBrowsing: true,
-  disallowSubView: false,
-  localized: false,
-  shortcutId: 'toggle-tree-tabs-key',
-  onBuild(document) {
-    const node = element(document, XUL, 'toolbarbutton', {
-      id:          'toggle-tree-tabs',
-      class:       'toolbarbutton-1',
-      type:        'checkbox',
-      label:       this.locale.get('tabsSidebarButton_label'),
-    }, [
-      element(document, XUL, 'image', {
-        class: 'toolbarbutton-icon',
-      }),
-      element(document, XUL, 'label', {
-        class: 'toolbarbutton-text',
-        crop:  'end',
-        flex:  '1',
-      }, [this.locale.get('tabsSidebarButton_label')]),
-    ]);
-    this.updateToggleButton(document, node);
-    return node;
-  },
-  onCreated(node) {
-    this.updateToggleButton(node.ownerDocument, node);
   },
 
   onPrefChanged(name) {

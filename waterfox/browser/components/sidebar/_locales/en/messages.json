@@ -1009,9 +1009,6 @@
 
   "tabsSidebarButton_label": { "message": "Tree Vertical Tabs" },
   "tabsSidebarButton_tooltiptext": { "message": "Toggle Tree Vertical Tabs" },
-  "openButton_tooltip": { "message": "Show Tree Vertical Tabs" },
-  "optionsButton_tooltip": { "message": "Open Options for Tree Vertical Tabs" },
-  "closeButton_tooltip": { "message": "Close Tree Vertical Tabs" },
 
   "preferencesCategoryName": { "message": "Tree Vertical Tabs" },
   "preferencesCategoryTooltipText": { "message": "Tree Vertical Tabs" },

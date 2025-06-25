@@ -187,3 +187,33 @@
     display: none !important
   }
 }
+
+
+/* Tree Vertical Tabs */
+
+/* toolbar button */
+#toggle-tree-tabs {
+  list-style-image: url("./tree-vertical-tabs-16x16.svg#toolbar-context");
+}
+#toggle-tree-tabs image {
+  -moz-context-properties: fill, fill-opacity;
+  color: inherit;
+  fill: currentColor;
+  min-height: 16px;
+  min-width: 16px;
+}
+
+/* tabs sidebar box */
+#tree-tabs-box {
+  background-color: var(--sidebar-background-color);
+  color: var(--sidebar-text-color);
+  text-shadow: none;
+  min-width: 50px;
+}
+:root[BookmarksToolbarOverlapsBrowser] #tree-tabs-box {
+  padding-top: var(--bookmarks-toolbar-overlapping-browser-height);
+}
+
+#tree-tabs {
+  flex: 1;
+}

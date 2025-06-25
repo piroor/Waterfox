@@ -1003,9 +1003,6 @@
 
   "tabsSidebarButton_label": { "message": "ツリー垂直タブ" },
   "tabsSidebarButton_tooltiptext": { "message": "ツリー垂直タブの表示を切り替えます" },
-  "openButton_tooltip": { "message": "ツリー垂直タブを開く" },
-  "optionsButton_tooltip": { "message": "ツリー垂直タブの設定を開く" },
-  "closeButton_tooltip": { "message": "ツリー垂直タブを閉じる" },
 
   "preferencesCategoryName": { "message": "ツリー垂直タブ" },
   "preferencesCategoryTooltipText": { "message": "ツリー垂直タブ" },
