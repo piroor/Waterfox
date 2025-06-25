@@ -97,14 +97,6 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
       element(document, XUL, 'label', [
         element(document, HTML, 'h2', [locale.get('preferences_appearanceGroup_caption')]),
       ]),
-      element(document, XUL, 'vbox', { id: 'tabsSidebar_hideHorizontalTabsWhileActiveBox' }, [
-        element(document, XUL, 'checkbox', {
-          id:         'tabsSidebar_hideHorizontalTabsWhileActive',
-          preference: `${BASE_PREF}hideHorizontalTabsWhileActive`,
-          label:      locale.get('preferences_hideHorizontalTabsWhileActive_label'),
-          accesskey:  locale.get('preferences_hideHorizontalTabsWhileActive_accesskey'),
-        }),
-      ]),
       element(document, XUL, 'vbox', { id: 'tabsSidebar_faviconizePinnedTabsBox' }, [
         element(document, XUL, 'checkbox', {
           id:         'tabsSidebar_faviconizePinnedTabs',
@@ -156,13 +148,6 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
     }, [
       element(document, XUL, 'label', [
         element(document, HTML, 'h2', [locale.get('preferences_treeBehaviorGroup_caption')]),
-      ]),
-      element(document, XUL, 'vbox', { id: 'tabsSidebar_useTreeBox' }, [
-        element(document, XUL, 'checkbox', {
-          id:        'tabsSidebar_useTree',
-          label:     locale.get('preferences_useTree'),
-          accesskey: locale.get('preferences_useTree_accesskey'),
-        }),
       ]),
       element(document, XUL, 'vbox', { id: 'tabsSidebar_autoCollapseExpandSubtreeOnAttachBox' }, [
         element(document, XUL, 'checkbox', {
@@ -761,33 +746,16 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
     }
     document.defaultView.gSidebarPage = {
       init() {
-        document.querySelector('#tabsSidebar_useTree').checked = (
-          Services.prefs.getBoolPref(`${BASE_PREF}autoAttach`) &&
-          Services.prefs.getBoolPref(`${BASE_PREF}syncParentTabAndOpenerTab`) &&
-          Services.prefs.getStringPref(`${BASE_PREF}maxTreeLevel`) != '0'
-        );
-        this.updateTreeOptions();
-
-        this.onCommand = this.onCommand.bind(this);
         this.onButtonClick = this.onButtonClick.bind(this);
         this.onButtonKeyDown = this.onButtonKeyDown.bind(this);
 
-        document.addEventListener('command', this.onCommand);
         document.addEventListener('click', this.onButtonClick);
         document.addEventListener('keydown', this.onButtonKeyDown);
       },
 
       uninit() {
-        document.removeEventListener('command', this.onCommand);
         document.removeEventListener('click', this.onButtonClick);
         document.removeEventListener('keydown', this.onButtonKeyDown);
-      },
-
-      updateTreeOptions() {
-        const active = document.querySelector('#tabsSidebar_useTree').checked;
-        for (const node of document.querySelectorAll('[data-category="paneTabsSidebar"] .tree-option')) {
-          node.disabled = !active;
-        }
       },
 
       openAdvancedOptions() {
@@ -812,24 +780,6 @@ function initSidebarCategory(document, { locale, BASE_URL, BASE_PREF }) {
             triggeringPrincipal:  Services.scriptSecurityManager.getSystemPrincipal(),
             inBackground:         false,
           });
-      },
-
-      onCommand(event) {
-        switch (event.target.id) {
-          case 'tabsSidebar_useTree':
-            if (event.target.checked) {
-              Services.prefs.setBoolPref(`${BASE_PREF}autoAttach`, true);
-              Services.prefs.setBoolPref(`${BASE_PREF}syncParentTabAndOpenerTab`, true);
-              Services.prefs.setStringPref(`${BASE_PREF}maxTreeLevel`, '-1');
-            }
-            else {
-              Services.prefs.setBoolPref(`${BASE_PREF}autoAttach`, false);
-              Services.prefs.setBoolPref(`${BASE_PREF}syncParentTabAndOpenerTab`, false);
-              Services.prefs.setStringPref(`${BASE_PREF}maxTreeLevel`, '0');
-            }
-            this.updateTreeOptions();
-            break;
-        }
       },
 
       onButtonClick(event) {
@@ -893,7 +843,6 @@ function uninitSidebarCategory(document) {
     node.parentNode.removeChild(node);
   }
 
-  document.removeEventListener('command', document.defaultView.gSidebarPage.onCommand);
   document.removeEventListener('click', document.defaultView.gSidebarPage.onButtonClick);
   document.removeEventListener('keydown', document.defaultView.gSidebarPage.onButtonKeyDown);
 

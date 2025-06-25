@@ -134,7 +134,7 @@ const BrowserWindowWatcher = {
   installTabsSidebar(win) {
     const document = win.document;
 
-    if (document.querySelector('#tabs-sidebar-style'))
+    if (document.querySelector('#tree-tabs-style'))
       return true;
 
     const range = document.createRange();
@@ -142,17 +142,13 @@ const BrowserWindowWatcher = {
     range.selectNode(document.head);
     range.collapse(false);
     range.insertNode(element(document, HTML, 'style', {
-      id: 'tabs-sidebar-style',
+      id: 'tree-tabs-style',
     }, [`
-      :root.hide-horizontal-tabs-while-tabs-sidebar-is-active.tabs-sidebar-is-active #TabsToolbar {
-        visibility: collapse;
-      }
-
       /* toolbar button */
-      #toggle-tabs-sidebar {
+      #toggle-tree-tabs {
         list-style-image: url("${this.BASE_URL}resources/16x16.svg#toolbar-context");
       }
-      #toggle-tabs-sidebar image {
+      #toggle-tree-tabs image {
         -moz-context-properties: fill, fill-opacity;
         color: inherit;
         fill: currentColor;
@@ -161,17 +157,17 @@ const BrowserWindowWatcher = {
       }
 
       /* tabs sidebar box */
-      #tabs-sidebar-box {
+      #tree-tabs-box {
         background-color: var(--sidebar-background-color);
         color: var(--sidebar-text-color);
         text-shadow: none;
         min-width: 50px;
       }
-      :root[BookmarksToolbarOverlapsBrowser] #tabs-sidebar-box {
+      :root[BookmarksToolbarOverlapsBrowser] #tree-tabs-box {
         padding-top: var(--bookmarks-toolbar-overlapping-browser-height);
       }
 
-      #tabs-sidebar {
+      #tree-tabs {
         flex: 1;
       }
     `.trim()]));
@@ -180,34 +176,34 @@ const BrowserWindowWatcher = {
     // they are removed and re-insertedby reloading of this addon. For consistensy
     // it may need to be implemented without XUL elements...
     document.querySelector('#mainCommandSet').appendChild(element(document, XUL, 'command', {
-      id: 'toggle-tabs-sidebar-command',
+      id: 'toggle-tree-tabs-command',
     }));
     // So, as a workaround we don't remove the key element on uninstallation and reuse existing key element.
-    if (!document.querySelector('#toggle-tabs-sidebar-key')) {
+    if (!document.querySelector('#toggle-tree-tabs-key')) {
       document.querySelector('#mainKeyset').appendChild(element(document, XUL, 'key', {
-        id:      'toggle-tabs-sidebar-key',
+        id:      'toggle-tree-tabs-key',
         keycode: 'VK_F1',
-        command: 'toggle-tabs-sidebar-command',
+        command: 'toggle-tree-tabs-command',
       }));
     }
 
     document.querySelector('#viewSidebarMenu').appendChild(element(document, XUL, 'menuseparator', {
-      id: 'viewmenu-tabs-sidebar-separator',
+      id: 'viewmenu-tree-tabs-separator',
     }));
     document.querySelector('#viewSidebarMenu').appendChild(element(document, XUL, 'menuitem', {
-      id:    'viewmenu-toggle-tabs-sidebar',
+      id:    'viewmenu-toggle-tree-tabs',
       type:  'checkbox',
       label: this.locale.get('tabsSidebarButton_label'),
-      key:   'toggle-tabs-sidebar-key',
+      key:   'toggle-tree-tabs-key',
     }));
 
     const elements = document.createDocumentFragment();
 
     const shouldShowSidebar = this.shouldShowSidebar(document);
 
-    const width = Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'width') || 200;
+    const width = Services.xulStore.getValue(document.URL, 'tree-tabs-box', 'width') || 200;
 
-    const tabsSidebarElement = document.querySelector('#tabs-sidebar');
+    const tabsSidebarElement = document.querySelector('#tree-tabs');
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('src', 'chrome://browser/content/webext-panels.xhtml');
 
@@ -222,7 +218,7 @@ const BrowserWindowWatcher = {
             false
           );
         } else {
-          console.error('WaterfoxBridge: #tabs-sidebar contentWindow is not available.');
+          console.error('WaterfoxBridge: #tree-tabs contentWindow is not available.');
         }
       }, { capture: true, once: true });
 
@@ -239,7 +235,7 @@ const BrowserWindowWatcher = {
         }
       }, { capture: true });
     } else {
-      console.error('WaterfoxBridge: #tabs-sidebar element not found. Cannot attach event listeners or load panel.');
+      console.error('WaterfoxBridge: #tree-tabs element not found. Cannot attach event listeners or load panel.');
     }
 
     document.addEventListener('SidebarShown', this, { capture: true });
@@ -248,7 +244,6 @@ const BrowserWindowWatcher = {
     document.addEventListener('customizationchange', this, { capture: true });
 
     this.updateToggleButton(document);
-    this.updateHorizontalTabsState(document);
 
     return true;
   },
@@ -278,14 +273,12 @@ const BrowserWindowWatcher = {
 
   shouldShowSidebar(document) {
     // it should be hidden by default, as a built-in feature of Waterfox
-    return Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'hidden') != 'true';
+    return Services.xulStore.getValue(document.URL, 'tree-tabs-box', 'hidden') != 'true';
   },
 
   uninstallTabsSidebar(win) {
     const document = win.document;
 
-    document.documentElement.classList.remove('hide-horizontal-tabs-while-tabs-sidebar-is-active');
-    document.documentElement.classList.remove('tabs-sidebar-is-active');
     win.CustomTitlebar.allowedBy('TabsSidebar', true);
 
     document.removeEventListener('SidebarShown', this, { capture: true });
@@ -293,18 +286,18 @@ const BrowserWindowWatcher = {
     document.removeEventListener('command', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
-    const tabsSidebarElement = document.querySelector('#tabs-sidebar');
+    const tabsSidebarElement = document.querySelector('#tree-tabs');
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('src', 'about:blank');
     }
 
     for (const node of document.querySelectorAll(`
       /* Don't remove key element because only the first element added is effective.*/
-      /*#toggle-tabs-sidebar-key,*/
-      #toggle-tabs-sidebar-command,
-      #viewmenu-tabs-sidebar-separator,
-      #viewmenu-toggle-tabs-sidebar,
-      #tabs-sidebar-style
+      /*#toggle-tree-tabs-key,*/
+      #toggle-tree-tabs-command,
+      #viewmenu-tree-tabs-separator,
+      #viewmenu-toggle-tree-tabs,
+      #tree-tabs-style
     `)) {
       node.parentNode.removeChild(node);
     }
@@ -359,9 +352,9 @@ const BrowserWindowWatcher = {
       return;
 
     tabPreview.__ws__calculateCoordinates = () => {
-      const tabsSidebar = win.document.querySelector('#tabs-sidebar');
+      const tabsSidebar = win.document.querySelector('#tree-tabs');
       const tabsSidebarRect = tabsSidebar.getBoundingClientRect();
-      const align = win.document.documentElement.classList.contains('tabs-sidebar-right') ? 'right' : 'left';
+      const align = win.document.documentElement.classList.contains('tree-tabs-right') ? 'right' : 'left';
       const previewRect = tabPreview._panel.getBoundingClientRect();
       const x = align == 'left' ?
         tabsSidebar.screenX + tabsSidebarRect.width - 2 :
@@ -440,11 +433,11 @@ const BrowserWindowWatcher = {
   },
 
   updateToggleButton(document, button) {
-    button = button || document.querySelector('#toggle-tabs-sidebar');
+    button = button || document.querySelector('#toggle-tree-tabs');
     if (!button)
       return;
 
-    const viewMenuItem = document.querySelector('#viewmenu-toggle-tabs-sidebar');
+    const viewMenuItem = document.querySelector('#viewmenu-toggle-tree-tabs');
     if (this.shouldShowSidebar(document)) {
       button.setAttribute('checked', true);
       button.setAttribute('tooltiptext', this.locale.get('closeButton_tooltip'));
@@ -501,38 +494,19 @@ const BrowserWindowWatcher = {
   },
 
   toggleTabsToolbar(document) {
-    const shouldOpen = document.querySelector('#tabs-sidebar-box').getAttribute('hidden') == 'true';
+    const shouldOpen = document.querySelector('#tree-tabs-box').getAttribute('hidden') == 'true';
     if (shouldOpen)
       this.openTabsSidebar(document);
     else
       this.closeTabsSidebar(document);
     this.updateToggleButton(document);
-    this.updateHorizontalTabsState(document);
-  },
-
-  updateHorizontalTabsState(document) {
-    const sidebarBox = document.querySelector('#tabs-sidebar-box');
-    let active = false;
-    if (sidebarBox) {
-      active = sidebarBox.getAttribute('hidden') != 'true';
-    } else {
-      console.error('WaterfoxBridge: #tabs-sidebar-box element not found in window:', document.defaultView.location.href, '. Cannot update horizontal tabs state.');
-      // Defaulting to 'active = false' as a fallback
-    }
-    const hideHorizontalTabsWhileActive = Services.prefs.getBoolPref(`${this.BASE_PREF}hideHorizontalTabsWhileActive`, true);
-
-    document.documentElement.classList.toggle('tabs-sidebar-is-active', active);
-    document.documentElement.classList.toggle('hide-horizontal-tabs-while-tabs-sidebar-is-active', hideHorizontalTabsWhileActive);
-    if (document.defaultView.CustomTitlebar &&
-        typeof document.defaultView.CustomTitlebar.allowedBy === 'function') {
-      document.defaultView.CustomTitlebar.allowedBy('TabsSidebar', !hideHorizontalTabsWhileActive || !active);
-    } else {
-      console.warn('WaterfoxBridge: CustomTitlebar or CustomTitlebar.allowedBy is not available on window:', document.defaultView.location.href);
-    }
   },
 
   openTabsSidebar(document) {
-    const box = document.querySelector('#tabs-sidebar-box');
+    Services.prefs.setBoolPref('sidebar.revamp', true);
+    Services.prefs.setBoolPref('sidebar.verticalTabs', true);
+
+    const box = document.querySelector('#tree-tabs-box');
     box.removeAttribute('hidden');
     Services.xulStore.removeValue(document.URL, box.id, 'hidden');
 
@@ -546,7 +520,7 @@ const BrowserWindowWatcher = {
   },
 
   closeTabsSidebar(document) {
-    const box = document.querySelector('#tabs-sidebar-box');
+    const box = document.querySelector('#tree-tabs-box');
     box.setAttribute('hidden', true);
     Services.xulStore.persist(box, 'hidden');
 
@@ -564,13 +538,13 @@ const BrowserWindowWatcher = {
     switch (event.type) {
       case 'command':
         switch (event.target.id) {
-          case 'toggle-tabs-sidebar':
-          case 'toggle-tabs-sidebar-command':
-          case 'viewmenu-toggle-tabs-sidebar':
+          case 'toggle-tree-tabs':
+          case 'toggle-tree-tabs-command':
+          case 'viewmenu-toggle-tree-tabs':
             this.toggleTabsToolbar(event.target.ownerDocument);
             break;
 
-          case 'tabs-sidebar-moreOptions':
+          case 'tree-tabs-moreOptions':
             this.openOptions(win, event.shiftKey);
             this.tryHidePopup(event);
             break;
@@ -578,7 +552,7 @@ const BrowserWindowWatcher = {
         break;
 
       case 'mouseup':
-        Services.xulStore.persist(event.target.ownerDocument.querySelector('#tabs-sidebar-box'), 'width');
+        Services.xulStore.persist(event.target.ownerDocument.querySelector('#tree-tabs-box'), 'width');
         break;
 
       case 'customizationchange':
@@ -665,7 +639,7 @@ const BrowserWindowWatcher = {
   },
 
   // behave as a toolbar customization widget
-  id: 'toggle-tabs-sidebar',
+  id: 'toggle-tree-tabs',
   type: 'custom',
   source: 'external',
   removable: true,
@@ -679,10 +653,10 @@ const BrowserWindowWatcher = {
   showInPrivateBrowsing: true,
   disallowSubView: false,
   localized: false,
-  shortcutId: 'toggle-tabs-sidebar-key',
+  shortcutId: 'toggle-tree-tabs-key',
   onBuild(document) {
     const node = element(document, XUL, 'toolbarbutton', {
-      id:          'toggle-tabs-sidebar',
+      id:          'toggle-tree-tabs',
       class:       'toolbarbutton-1',
       type:        'checkbox',
       label:       this.locale.get('tabsSidebarButton_label'),
@@ -705,14 +679,6 @@ const BrowserWindowWatcher = {
 
   onPrefChanged(name) {
     switch (name) {
-      case `${this.BASE_PREF}hideHorizontalTabsWhileActive`: {
-        const windows = Services.wm.getEnumerator('navigator:browser');
-        while (windows.hasMoreElements()) {
-          const win = windows.getNext()/*.QueryInterface(Components.interfaces.nsIDOMWindow)*/;
-          this.updateHorizontalTabsState(win.document);
-        }
-      }; break;
-
       case 'browser.uiCustomization.state': {
         if (!Services.prefs.getStringPref(name)) { // resetting!
           const tryInsertButton = () => {

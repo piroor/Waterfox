@@ -1,9 +1,9 @@
 {
-  "extensionName": { "message": "タブサイドバー" },
-  "extensionDescription": { "message": "Waterfox用の縦型タブバーです。" },
+  "extensionName": { "message": "ツリー垂直タブ" },
+  "extensionDescription": { "message": "Waterfox用のツリー垂直タブバーです。" },
 
-  "sidebarTitle": { "message": "タブサイドバー" },
-  "sidebarToggleDescription": { "message": "タブサイドバーの表示・非表示を切り替える" },
+  "sidebarTitle": { "message": "ツリー垂直タブ" },
+  "sidebarToggleDescription": { "message": "ツリー垂直タブの表示・非表示を切り替える" },
 
   "command_tabMoveUp":             { "message": "現在のタブを単体で1つ上に移動" },
   "command_treeMoveUp":            { "message": "現在のタブとその配下のタブを1つ上に移動" },
@@ -993,33 +993,24 @@
 
 
   "tryConfirmUsingTST_title":   { "message": "競合の検出" },
-  "tryConfirmUsingTST_message": { "message": "「Tree Style Tab」拡張機能が検出されました：Waterfoxのタブサイドバーと競合する恐れがあります。どちらの機能を有効にするか選択してください。" },
-  "tryConfirmUsingTST_WS":      { "message": "Waterfoxのタブサイドバー" },
+  "tryConfirmUsingTST_message": { "message": "「Tree Style Tab」拡張機能が検出されました：Waterfoxのツリー垂直タブと競合する恐れがあります。どちらの機能を有効にするか選択してください。" },
+  "tryConfirmUsingTST_WS":      { "message": "Waterfoxのツリー垂直タブ" },
   "tryConfirmUsingTST_TST":     { "message": "Tree Style Tab" },
   "tryConfirmUsingTST_both":    { "message": "両方有効にする" },
   "tryConfirmUsingTST_ask":     { "message": "競合を検出した場合は再度確認する" },
-  "howToActivateAgain_title":   { "message": "タブサイドバー無効化" },
-  "howToActivateAgain_message": { "message": "Waterfoxのタブサイドバーを無効化します。機能をもう一度使用する場合は、アドオンマネージャーで「タブサイドバー」を有効化してください。" },
+  "howToActivateAgain_title":   { "message": "ツリー垂直タブ無効化" },
+  "howToActivateAgain_message": { "message": "Waterfoxのツリー垂直タブを無効化します。機能をもう一度使用する場合は、アドオンマネージャーで「ツリー垂直タブ」を有効化してください。" },
 
-  "tabsSidebarButton_label": { "message": "タブサイドバー" },
-  "tabsSidebarButton_tooltiptext": { "message": "タブサイドバーの表示を切り替えます" },
-  "openButton_tooltip": { "message": "タブサイドバーを開く" },
-  "optionsButton_tooltip": { "message": "タブサイドバーの設定を開く" },
-  "closeButton_tooltip": { "message": "タブサイドバーを閉じる" },
+  "tabsSidebarButton_label": { "message": "ツリー垂直タブ" },
+  "tabsSidebarButton_tooltiptext": { "message": "ツリー垂直タブの表示を切り替えます" },
+  "openButton_tooltip": { "message": "ツリー垂直タブを開く" },
+  "optionsButton_tooltip": { "message": "ツリー垂直タブの設定を開く" },
+  "closeButton_tooltip": { "message": "ツリー垂直タブを閉じる" },
 
-  "optionsButton_moveLeft_label":      { "message": "タブサイドバーを左側へ移動" },
-  "optionsButton_moveLeft_accesskey":  { "message": "M" },
-  "optionsButton_moveRight_label":     { "message": "タブサイドバーを右側へ移動" },
-  "optionsButton_moveRight_accesskey": { "message": "M" },
-  "optionsButton_moreOptions_label":     { "message": "設定..." },
-  "optionsButton_moreOptions_accesskey": { "message": "E" },
-
-  "preferencesCategoryName": { "message": "タブサイドバー" },
-  "preferencesCategoryTooltipText": { "message": "タブサイドバー" },
+  "preferencesCategoryName": { "message": "ツリー垂直タブ" },
+  "preferencesCategoryTooltipText": { "message": "ツリー垂直タブ" },
 
   "preferences_appearanceGroup_caption": { "message": "タブの外観" },
-  "preferences_hideHorizontalTabsWhileActive_label":     { "message": "タブサイドバーが表示されている間はタブバーを隠す" },
-  "preferences_hideHorizontalTabsWhileActive_accesskey": { "message": "E" },
   "preferences_faviconizePinnedTabs_accesskey": { "message": "S" },
   "config_autoStickyTab_caption":       { "message": "以下のタブが画面外にスクロールアウトしたときにタブバーの端に貼り付ける" },
   "config_stickyActiveTab_label":          { "message": "現在のタブ" },
@@ -1030,8 +1021,6 @@
   "preferences_stickySharingTab_accesskey": { "message": "G" },
 
   "preferences_treeBehaviorGroup_caption": { "message": "タブのツリー表示" },
-  "preferences_useTree": { "message": "タブをツリー状にインデント表示する" },
-  "preferences_useTree_accesskey": { "message": "I" },
   "preferences_autoCollapseExpandSubtreeOnAttach_accesskey": { "message": "C" },
   "preferences_autoCollapseExpandSubtreeOnSelect_accesskey": { "message": "X" },
   "preferences_treeDoubleClickBehavior_accesskey": { "message": "D" },

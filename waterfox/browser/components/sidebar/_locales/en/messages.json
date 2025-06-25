@@ -1,9 +1,9 @@
 {
-  "extensionName": { "message": "Tabs Sidebar" },
-  "extensionDescription": { "message": "Vertical tabs sidebar for Waterfox." },
+  "extensionName": { "message": "Tree Vertical Tabs" },
+  "extensionDescription": { "message": "Tree Vertical Tabs for Waterfox." },
 
-  "sidebarTitle": { "message": "Tabs Sidebar" },
-  "sidebarToggleDescription": { "message": "Toggle Tabs Sidebar" },
+  "sidebarTitle": { "message": "Tree Vertical Tabs" },
+  "sidebarToggleDescription": { "message": "Toggle Tree Vertical Tabs" },
 
   "command_tabMoveUp":             { "message": "Move Current Tab Up" },
   "command_treeMoveUp":            { "message": "Move Current Tree Up" },
@@ -245,16 +245,16 @@
   "sidebarPositionRighsideNotification_leftside":  { "message": "Keep appearance for Left Side" },
 
   "sidebarPositionOptionNotification_title":   { "message": "Saved the appearance option for the sidebar position" },
-  "sidebarPositionOptionNotification_message": { "message": "Please see the \"Appearance\" section of the Tabs Sidebar's options page if you need to change the option." },
+  "sidebarPositionOptionNotification_message": { "message": "Please see the \"Appearance\" section of the Tree Vertical Tabs's options page if you need to change the option." },
 
-  "startup_notification_title_installed":   { "message": "For newcomer of Tabs Sidebar" },
+  "startup_notification_title_installed":   { "message": "For newcomer of Tree Vertical Tabs" },
   "startup_notification_message_installed": { "message": "Some extra permissions are required for more natural user experiences. Please click here to grant them." },
   "startup_notification_message_installed_linux": { "message": "Some extra permissions are required for more natural user experiences. Please click the button to grant them." },
-  "startup_notification_title_updated":     { "message": "Noticeable Changes on Tabs Sidebar" },
+  "startup_notification_title_updated":     { "message": "Noticeable Changes on Tree Vertical Tabs" },
   "startup_notification_message_updated":   { "message": "Some changes may affect to your use case. Please click here to see the changelog." },
   "startup_notification_message_updated_linux":   { "message": "Some changes may affect to your use case. Please click the button to see the changelog." },
 
-  "message_startup_description_1": { "message": "Tabs Sidebar's vertical tab bar is available as one of choosable sidebar panels. If you don't see it yet, hit the " },
+  "message_startup_description_1": { "message": "Tree Vertical Tabs's vertical tab bar is available as one of choosable sidebar panels. If you don't see it yet, hit the " },
   "message_startup_description_key": { "message": "\"F1\" key" },
   "message_startup_description_2": { "message": " or click the " },
   "message_startup_description_3": { "message": " button in the toolbar, to activate the sidebar panel." },
@@ -281,7 +281,7 @@
 
 
   "message_startup_userChromeCss_notify": { "message": "How to hide top tab bar and sidebar header?" },
-  "message_startup_userChromeCss_description_1": { "message": "Due to restrictions of WebExtensions, Tabs Sidebar cannot control the browser's top tab bar and the sidebar header. If you need to control them, see " },
+  "message_startup_userChromeCss_description_1": { "message": "Due to restrictions of WebExtensions, Tree Vertical Tabs cannot control the browser's top tab bar and the sidebar header. If you need to control them, see " },
   "message_startup_userChromeCss_description_link_label": { "message": "customization examples by userChrome.css" },
   "message_startup_userChromeCss_description_link_uri": { "message": "https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules#for-userchromecss" },
   "message_startup_userChromeCss_description_2": { "message": ". But " },
@@ -289,12 +289,12 @@
   "message_startup_userChromeCss_description_3": { "message": "." },
 
   "api_requestedPermissions_title": { "message": "Request for Extra Permissions" },
-  "api_requestedPermissions_message": { "message": "⚠The extension \"$NAME$\" is requesting to do following operation:\n\n$PERMISSIONS$\n\nvia Tabs Sidebar's API. Click here if you grant that.",
+  "api_requestedPermissions_message": { "message": "⚠The extension \"$NAME$\" is requesting to do following operation:\n\n$PERMISSIONS$\n\nvia Tree Vertical Tabs's API. Click here if you grant that.",
     "placeholders": {
       "NAME":        { "content": "$1", "example": "foobar" },
       "PERMISSIONS": { "content": "$2", "example": "tabs" }
     }},
-  "api_requestedPermissions_message_linux": { "message": "⚠The extension \"$NAME$\" is requesting to do following operation:\n\n$PERMISSIONS$\n\nvia Tabs Sidebar's API. Click the button if you grant that.",
+  "api_requestedPermissions_message_linux": { "message": "⚠The extension \"$NAME$\" is requesting to do following operation:\n\n$PERMISSIONS$\n\nvia Tree Vertical Tabs's API. Click the button if you grant that.",
     "placeholders": {
       "NAME":        { "content": "$1", "example": "foobar" },
       "PERMISSIONS": { "content": "$2", "example": "tabs" }
@@ -379,7 +379,7 @@
   "config_showTreeCommandsInTabsContextMenuGlobally_label": { "message": "Show commands for tree of tabs in tab context menu globally ex. on the native tab bar" },
 
 
-  "config_title": { "message": "Tabs Sidebar Options" },
+  "config_title": { "message": "Tree Vertical Tabs Options" },
 
   "config_recommended_choice": { "message": "(Recommended)" },
   "config_firefoxCompatible_choice": { "message": "(simulates the browser's default behavior)" },
@@ -796,7 +796,7 @@
   "config_scrollLines_label_before": { "message": "Scroll up or down " },
   "config_scrollLines_label_after":  { "message": "lines via \"Scroll Tabs Up/Down by Lines\" shortcut commands" },
 
-  "config_userStyleRules_label": { "message": "User Style Sheet (extra style rules for contents provided by Tabs Sidebar, ex. the sidebar)" },
+  "config_userStyleRules_label": { "message": "User Style Sheet (extra style rules for contents provided by Tree Vertical Tabs, ex. the sidebar)" },
   "config_userStyleRules_description_before": { "message": "For more options, see " },
   "config_userStyleRules_description_link_label": { "message": "code snippets at TST wiki" },
   "config_userStyleRules_description_after": { "message": " also." },
@@ -829,7 +829,7 @@
   "helper_theme_list_link_uri": { "message": "https://github.com/piroor/treestyletab/wiki/Code-snippets-for-custom-style-rules#restore-old-built-in-themes" },
 
   "config_externaladdonpermissions_label": { "message": "Permissions for API Call from Other Extensions" },
-  "config_externaladdonpermissions_description": { "message": "Extensions allowed here may access detailed tab data or tabs in private windows, <em>through Tabs Sidebar's permissions</em>, even if the extension ifself is forbidden by the browser to access them. <em>Please don't give permission for extensions if you cannot trust them.</em>" },
+  "config_externaladdonpermissions_description": { "message": "Extensions allowed here may access detailed tab data or tabs in private windows, <em>through Tree Vertical Tabs's permissions</em>, even if the extension ifself is forbidden by the browser to access them. <em>Please don't give permission for extensions if you cannot trust them.</em>" },
   "config_externalAddonPermissions_header_name": { "message": "Extension Name" },
   "config_externalAddonPermissions_header_permissions": { "message": "Allowed Special Operations" },
   "config_externalAddonPermissions_header_incognito": { "message": "Notify Messages from Private Windows" },
@@ -886,8 +886,8 @@
   "config_requestPermissions_bookmarks_context": { "message": "Allow to open the context menu on bookmarks" },
   "config_requestPermissions_tabHide":   { "message": "Allow to show/hide individual tabs (*You must uncheck and re-check this before running tests, to ensure the permission is truly granted.)" },
 
-  "config_requestPermissions_fallbackToToolbarButton_title": { "message": "Click the \"Tabs Sidebar\" toolbar button" },
-  "config_requestPermissions_fallbackToToolbarButton_message": { "message": "Due to the browser's bug, you cannot request permission from this screen. Please click the \"Tabs Sidebar\" toolbar button to grant permissions." },
+  "config_requestPermissions_fallbackToToolbarButton_title": { "message": "Click the \"Tree Vertical Tabs\" toolbar button" },
+  "config_requestPermissions_fallbackToToolbarButton_message": { "message": "Due to the browser's bug, you cannot request permission from this screen. Please click the \"Tree Vertical Tabs\" toolbar button to grant permissions." },
 
   "config_all_caption": { "message": "All Configs" },
 
@@ -999,33 +999,24 @@
 
 
   "tryConfirmUsingTST_title":   { "message": "Conflicting Features Detected" },
-  "tryConfirmUsingTST_message": { "message": "\"Tree Style Tab\" extension has been detected: it may conflict with Waterfox's Tabs Sidebar. Please choose which one to enable." },
-  "tryConfirmUsingTST_WS":      { "message": "Waterfox's Tabs Sidebar" },
+  "tryConfirmUsingTST_message": { "message": "\"Tree Style Tab\" extension has been detected: it may conflict with Waterfox's Tree Vertical Tabs. Please choose which one to enable." },
+  "tryConfirmUsingTST_WS":      { "message": "Waterfox's Tree Vertical Tabs" },
   "tryConfirmUsingTST_TST":     { "message": "Tree Style Tab" },
   "tryConfirmUsingTST_both":    { "message": "Activate Both" },
   "tryConfirmUsingTST_ask":     { "message": "Confirm again when conflictiong features are detected" },
-  "howToActivateAgain_title":   { "message": "Tabs Sidebar disabled" },
-  "howToActivateAgain_message": { "message": "Deactivating Waterfox's Tabs Sidebar. You can activate it again via the Add-ons Manager." },
+  "howToActivateAgain_title":   { "message": "Tree Vertical Tabs disabled" },
+  "howToActivateAgain_message": { "message": "Deactivating Waterfox's Tree Vertical Tabs. You can activate it again via the Add-ons Manager." },
 
-  "tabsSidebarButton_label": { "message": "Tabs Sidebar" },
-  "tabsSidebarButton_tooltiptext": { "message": "Toggle Tabs Sidebar" },
-  "openButton_tooltip": { "message": "Show Tabs Sidebar" },
-  "optionsButton_tooltip": { "message": "Open Tabs Sidebar Options" },
-  "closeButton_tooltip": { "message": "Close Tabs Sidebar" },
+  "tabsSidebarButton_label": { "message": "Tree Vertical Tabs" },
+  "tabsSidebarButton_tooltiptext": { "message": "Toggle Tree Vertical Tabs" },
+  "openButton_tooltip": { "message": "Show Tree Vertical Tabs" },
+  "optionsButton_tooltip": { "message": "Open Options for Tree Vertical Tabs" },
+  "closeButton_tooltip": { "message": "Close Tree Vertical Tabs" },
 
-  "optionsButton_moveLeft_label":      { "message": "Move Tabs Sidebar to Left" },
-  "optionsButton_moveLeft_accesskey":  { "message": "M" },
-  "optionsButton_moveRight_label":     { "message": "Move Tabs Sidebar to Right" },
-  "optionsButton_moveRight_accesskey": { "message": "M" },
-  "optionsButton_moreOptions_label":     { "message": "More Settings…" },
-  "optionsButton_moreOptions_accesskey": { "message": "e" },
-
-  "preferencesCategoryName": { "message": "Tabs Sidebar" },
-  "preferencesCategoryTooltipText": { "message": "Tabs Sidebar" },
+  "preferencesCategoryName": { "message": "Tree Vertical Tabs" },
+  "preferencesCategoryTooltipText": { "message": "Tree Vertical Tabs" },
 
   "preferences_appearanceGroup_caption": { "message": "Appearance" },
-  "preferences_hideHorizontalTabsWhileActive_label":     { "message": "Hide tab bar while tabs sidebar is active" },
-  "preferences_hideHorizontalTabsWhileActive_accesskey": { "message": "e" },
   "preferences_faviconizePinnedTabs_accesskey": { "message": "S" },
   "config_autoStickyTab_caption":       { "message": "Tabs sticked to edges of the tab bar when they are scrolled out" },
   "config_stickyActiveTab_label":          { "message": "Active Tab" },
@@ -1036,8 +1027,6 @@
   "preferences_stickySharingTab_accesskey": { "message": "g" },
 
   "preferences_treeBehaviorGroup_caption": { "message": "Tree view of tabs" },
-  "preferences_useTree": { "message": "Indent child tabs like a tree" },
-  "preferences_useTree_accesskey": { "message": "I" },
   "preferences_autoCollapseExpandSubtreeOnAttach_accesskey": { "message": "c" },
   "preferences_autoCollapseExpandSubtreeOnSelect_accesskey": { "message": "x" },
   "preferences_treeDoubleClickBehavior_accesskey": { "message": "D" },

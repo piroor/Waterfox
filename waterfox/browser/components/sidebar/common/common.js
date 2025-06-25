@@ -26,11 +26,6 @@ const WATERFOX_SPECIFIC_VALUES = {
   // because full options page is already behind the "Advanced" options
   showExpertOptions: true,
 
-  // deactivate tree view by default
-  maxTreeLevel: 0,
-  autoAttach: false,
-  syncParentTabAndOpenerTab: false,
-
   // don't attach tabs as children of the active tab by default if possible
   autoAttachOnOpenedWithOwner: Constants.kNEWTAB_DO_NOTHING,
   insertNewTabFromPinnedTabAt: Constants.kINSERT_NO_CONTROL,
