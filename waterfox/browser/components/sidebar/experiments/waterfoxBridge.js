@@ -75,7 +75,6 @@ const BrowserWindowWatcher = {
       if (installed) {
         this.patchToTabHoverPreviewModules(win);
         this.patchToPlacesModules(win);
-        this.patchToFullScreenModules(win);
         win.addEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.addEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.addEventListener('visibilitychange', this);
@@ -111,7 +110,6 @@ const BrowserWindowWatcher = {
       try {
         this.unpatchTabHoverPreviewModules(win);
         this.unpatchPlacesModules(win);
-        this.unpatchFullScreenModules(win);
         win.removeEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.removeEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.removeEventListener('visibilitychange', this);
@@ -138,8 +136,6 @@ const BrowserWindowWatcher = {
 
     if (document.querySelector('#tabs-sidebar-style'))
       return true;
-
-    this.updateTabsSidebarPositionIn(document);
 
     const range = document.createRange();
 
@@ -174,194 +170,9 @@ const BrowserWindowWatcher = {
       :root[BookmarksToolbarOverlapsBrowser] #tabs-sidebar-box {
         padding-top: var(--bookmarks-toolbar-overlapping-browser-height);
       }
-      /* tabs sidebar header */
-      #tabs-sidebar-header {
-        background-color: var(--toolbar-bgcolor);
-        font-size: 1.333em;
-        padding: 4px;
-        border-bottom: 1px solid var(--sidebar-border-color);
-      }
-      #tabs-sidebar-header toolbarbutton image {
-        -moz-context-properties: fill, fill-opacity;
-        color: inherit;
-        fill: currentColor;
-        height: 12px;
-        width: 12px;
-      }
-      #tabs-sidebar-header separator {
-        height: 18px;
-      }
-      #tabs-sidebar-spacer {
-        flex: 1000 1000;
-      }
-      #tabs-sidebar-header toolbarbutton {
-        appearance: none;
-        border-radius: 0.2em;
-      }
-      #tabs-sidebar-header toolbarbutton:hover {
-        background: var(--toolbarbutton-hover-background);
-      }
-      #tabs-sidebar-options {
-        appearance: none;
-        list-style-image: url("chrome://global/skin/icons/settings.svg");
-      }
-      #tabs-sidebar-options image.toolbarbutton-arrow {
-        list-style-image: url(chrome://global/skin/icons/arrow-down-12.svg);
-        width: 10px;
-        height: 10px;
-        pointer-events: none; /* this is required to accept click events on the arrow */
-      }
-      :root:not(.tabs-sidebar-right) #tabs-sidebar-moveLeft,
-      :root.tabs-sidebar-right #tabs-sidebar-moveRight {
-        display: none;
-      }
-      @media not (-moz-bool-pref: "userChrome.icon.disabled") {
-        @media (-moz-bool-pref: "userChrome.icon.menu") {
-          @media (-moz-bool-pref: "userChrome.icon.context_menu") {
-            #tabs-sidebar-newTab {
-              list-style-image: var(--uc-new-tab-icon);
-            }
-            #tabs-sidebar-reloadTab,
-            #tabs-sidebar-reloadTabs {
-              list-style-image: url("chrome://browser/skin/lepton/reload.svg");
-            }
-            #tabs-sidebar-bookmarkTab,
-            #tabs-sidebar-bookmarkTabs {
-              list-style-image: url("chrome://browser/skin/bookmark.svg");
-            }
-            #tabs-sidebar-selectAll {
-              list-style-image: var(--uc-tab-multiple-icon);
-            }
-            #tabs-sidebar-undoClose {
-              list-style-image: url("chrome://browser/skin/lepton/undo.svg");
-            }
-            #tabs-sidebar-moreOptions {
-              list-style-image: url("chrome://global/skin/icons/settings.svg");
-            }
-          }
-        }
-      }
-      #tabs-sidebar-options-separator {
-        border-left: 1px solid;
-        margin: 0 0.5em;
-        opacity: 0.5;
-      }
 
       #tabs-sidebar {
         flex: 1;
-      }
-
-      /* order of UI elements */
-      /* leftside, with leftside built-in sidebar */
-      :root:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) {
-        order: 1 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) ~ #sidebar-splitter {
-        order: 2 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-box {
-        order: 3 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-splitter {
-        order: 4 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) ~ #appcontent {
-        order: 5 !important;
-      }
-      /* rightside, with leftside built-in sidebar */
-      :root.tabs-sidebar-right #sidebar-box:not([positionend="true"]) {
-        order: 1 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box:not([positionend="true"]) ~ #sidebar-splitter {
-        order: 2 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box:not([positionend="true"]) ~ #appcontent {
-        order: 3 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-splitter {
-        order: 4 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-box {
-        order: 5 !important;
-      }
-      /* leftside, with rightside built-in sidebar */
-      :root:not(.tabs-sidebar-right) #sidebar-box[positionend="true"] ~ #tabs-sidebar-box {
-        order: 1 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box[positionend="true"] ~ #tabs-sidebar-splitter {
-        order: 2 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box[positionend="true"] ~ #appcontent {
-        order: 3 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box[positionend="true"] ~ #sidebar-splitter {
-        order: 4 !important;
-      }
-      :root:not(.tabs-sidebar-right) #sidebar-box[positionend="true"] {
-        order: 5 !important;
-      }
-      /* rightside, with rightside built-in sidebar */
-      :root.tabs-sidebar-right #sidebar-box[positionend="true"] ~ #appcontent {
-        order: 1 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box[positionend="true"] ~ #tabs-sidebar-splitter {
-        order: 2 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box[positionend="true"] ~ #tabs-sidebar-box {
-        order: 3 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box[positionend="true"] ~ #sidebar-splitter {
-        order: 4 !important;
-      }
-      :root.tabs-sidebar-right #sidebar-box[positionend="true"] {
-        order: 5 !important;
-      }
-
-      :root[inDOMFullscreen] #tabs-sidebar-box,
-      :root[inDOMFullscreen] #tabs-sidebar-splitter {
-        visibility: collapse;
-      }
-
-      #tabs-sidebar-box[fullscreenShouldAnimate] {
-        transition: 0.8s margin-left ease-out,
-                    0.8s margin-right ease-out;
-      }
-      @media (-moz-bool-pref: "userChrome.fullscreen.overlap") {
-        @media (-moz-bool-pref: "browser.fullscreen.autohide") {
-          :root[sizemode="fullscreen"] #tabs-sidebar-box,
-          :root[sizemode="fullscreen"] #tabs-sidebar-splitter {
-            height: 100% !important;
-            position: fixed !important;
-            z-index: 900 !important;
-          }
-          :root[sizemode="fullscreen"] #tabs-sidebar-splitter {
-            width: 5px !important;
-            z-index: 890 !important;
-          }
-          :root[sizemode="fullscreen"]:not(.tabs-sidebar-right) #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-splitter,
-          :root[sizemode="fullscreen"].tabs-sidebar-right       #sidebar-box:not([positionend="true"]) ~ #tabs-sidebar-splitter,
-          :root[sizemode="fullscreen"]:not(.tabs-sidebar-right) #sidebar-box[positionend="true"]       ~ #tabs-sidebar-splitter,
-          :root[sizemode="fullscreen"].tabs-sidebar-right       #sidebar-box[positionend="true"]       ~ #tabs-sidebar-splitter {
-            order: unset !important;
-          }
-          :root[sizemode="fullscreen"]:not(.tabs-sidebar-right) #tabs-sidebar-box,
-          :root[sizemode="fullscreen"]:not(.tabs-sidebar-right) #tabs-sidebar-splitter {
-            left: 0;
-          }
-          :root[sizemode="fullscreen"].tabs-sidebar-right #tabs-sidebar-box,
-          :root[sizemode="fullscreen"].tabs-sidebar-right #tabs-sidebar-splitter {
-            right: 0;
-          }
-        }
-      }
-
-      @media (prefers-reduced-motion: no-preference) {
-        @media (-moz-bool-pref: "userChrome.decoration.animate") {
-          :root[sizemode="fullscreen"] #tabs-sidebar-box {
-            transition: margin-left 1.3s var(--animation-easing-function) 50ms,
-                        margin-right 1.3s var(--animation-easing-function) 50ms !important;
-          }
-        }
       }
     `.trim()]));
 
@@ -395,158 +206,17 @@ const BrowserWindowWatcher = {
     const shouldShowSidebar = this.shouldShowSidebar(document);
 
     const width = Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'width') || 200;
-    elements.appendChild(element(document, XUL, 'box', {
-      id:    'tabs-sidebar-box',
-      orient: 'vertical',
-      slot:  'tabstrip',
-    }, [
-      element(document, XUL, 'hbox', {
-        id:    'tabs-sidebar-header',
-        align: 'center',
-      }, [
-        element(document, XUL, 'spacer', {
-          id:    'tabs-sidebar-spacer',
-        }),
-        element(document, XUL, 'toolbarbutton', {
-          id:    'tabs-sidebar-options',
-          class: 'toolbarbutton-1',
-          type:  'menu',
-          tooltiptext: this.locale.get('optionsButton_tooltip'),
-        }, [
-          element(document, XUL, 'panel', {
-            id:       'tabs-sidebar-options-menupopup',
-            class:    'cui-widget-panel',
-            role:     'group',
-            type:     'arrow',
-            flip:     'slide',
-            orient:   'vertical',
-            position: 'bottomleft topleft',
-            slide:    'top',
-            consumeoutsideclicks: 'false',
-          }, [
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-moveLeft',
-              class:     'subviewbutton',
-              label:     this.locale.get('optionsButton_moveLeft_label'),
-              accesskey: this.locale.get('optionsButton_moveLeft_accesskey'),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-moveRight',
-              class:     'subviewbutton',
-              label:     this.locale.get('optionsButton_moveRight_label'),
-              accesskey: this.locale.get('optionsButton_moveRight_accesskey'),
-            }),
-            element(document, XUL, 'toolbarseparator'),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-newTab',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_newTab_label')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_newTab_label')),
-              //command:   'cmd_newNavigatorTab', // same to #toolbar-context-openANewTab
-            }),
-            element(document, XUL, 'toolbarseparator'),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-reloadTab',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_reloadSelected_label')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_reloadSelected_label')),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-reloadTabs',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_reloadSelected_label_multiselected')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_reloadSelected_label_multiselected')),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-bookmarkTab',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_bookmarkSelected_label')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_bookmarkSelected_label')),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-bookmarkTabs',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_bookmarkSelected_label_multiselected')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_bookmarkSelected_label_multiselected')),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-selectAll',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_selectAllTabs_label')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_selectAllTabs_label')),
-            }),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-undoClose',
-              class:     'subviewbutton',
-              label:     this.sanitizeMenuLabel(this.locale.get('tabContextMenu_undoClose_label')),
-              accesskey: this.extractAccessKey(this.locale.get('tabContextMenu_undoClose_label')),
-            }),
-            element(document, XUL, 'toolbarseparator'),
-            element(document, XUL, 'toolbarbutton', {
-              id:        'tabs-sidebar-moreOptions',
-              class:     'subviewbutton',
-              label:     this.locale.get('optionsButton_moreOptions_label'),
-              accesskey: this.locale.get('optionsButton_moreOptions_accesskey'),
-            }),
-          ]),
-          element(document, XUL, 'image', {
-            class: 'toolbarbutton-icon',
-          }),
-          element(document, XUL, 'label', {
-            class: 'toolbarbutton-text',
-            crop:  'end',
-            flex:  '1',
-          }),
-          element(document, XUL, 'image', {
-            class: 'toolbarbutton-arrow',
-          }),
-        ]),
-        element(document, XUL, 'separator', {
-          id: 'tabs-sidebar-options-separator',
-        }),
-        element(document, XUL, 'toolbarbutton', {
-          id:    'tabs-sidebar-close',
-          class: 'close-icon tabbable',
-          tooltiptext: this.locale.get('closeButton_tooltip'),
-        }, [
-          element(document, XUL, 'image', {
-            class: 'toolbarbutton-icon',
-          }),
-          element(document, XUL, 'label', {
-            class: 'toolbarbutton-text',
-            crop:  'end',
-            flex:  '1',
-          }),
-        ]),
-      ]),
-      element(document, XUL, 'browser', {
-        id:                'tabs-sidebar',
-        autoscroll:        'false',
-        disablehistory:    'true',
-        disablefullscreen: 'true',
-        tooltip:           'aHTMLTooltip',
-        src:               'chrome://browser/content/webext-panels.xhtml',
-      }),
-    ]));
-
-    const targetElement = document.querySelector('#sidebar-main *|sidebar-main');
-    if (targetElement) {
-      range.selectNodeContents(targetElement);
-      range.collapse(true);
-      range.insertNode(elements);
-    } else {
-      console.error('WaterfoxBridge: #tabbrowser-tabbox element not found in window:', win.location.href, '. Cannot insert sidebar elements.');
-      // If #tabbrowser-tabbox is critical, the sidebar might not function correctly.
-      // Consider if further error handling or alternative insertion logic is needed.
-    }
-    range.detach();
 
     const tabsSidebarElement = document.querySelector('#tabs-sidebar');
     if (tabsSidebarElement) {
+      tabsSidebarElement.setAttribute('src', 'chrome://browser/content/webext-panels.xhtml');
+
       tabsSidebarElement.addEventListener('load', () => {
         // Ensure contentWindow is available before calling loadPanel
-        if (tabsSidebarElement.contentWindow) {
-          tabsSidebarElement.contentWindow.loadPanel(
+        const win = tabsSidebarElement.contentWindow;
+        if (win) {
+          win.document.querySelector('*|sidebar-panel-header').hidden = true;
+          win.loadPanel(
             this.EXTENSION_ID,
             `${this.BASE_URL}sidebar/sidebar.html`,
             false
@@ -606,18 +276,9 @@ const BrowserWindowWatcher = {
     return null;
   },
 
-  updateOptionsPopup(menupopup) {
-    const gBrowser = menupopup.ownerDocument.defaultView.gBrowser;
-    const multiselected = gBrowser.multiSelectedTabsCount > 0;
-    menupopup.querySelector('#tabs-sidebar-reloadTab').hidden = multiselected;
-    menupopup.querySelector('#tabs-sidebar-reloadTabs').hidden = !multiselected;
-    menupopup.querySelector('#tabs-sidebar-bookmarkTab').hidden = multiselected;
-    menupopup.querySelector('#tabs-sidebar-bookmarkTabs').hidden = !multiselected;
-  },
-
   shouldShowSidebar(document) {
     // it should be hidden by default, as a built-in feature of Waterfox
-    return Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'shown') == 'true';
+    return Services.xulStore.getValue(document.URL, 'tabs-sidebar-box', 'hidden') != 'true';
   },
 
   uninstallTabsSidebar(win) {
@@ -632,8 +293,12 @@ const BrowserWindowWatcher = {
     document.removeEventListener('command', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
+    const tabsSidebarElement = document.querySelector('#tabs-sidebar');
+    if (tabsSidebarElement) {
+      tabsSidebarElement.setAttribute('src', 'about:blank');
+    }
+
     for (const node of document.querySelectorAll(`
-      #tabs-sidebar-box,
       /* Don't remove key element because only the first element added is effective.*/
       /*#toggle-tabs-sidebar-key,*/
       #toggle-tabs-sidebar-command,
@@ -774,139 +439,6 @@ const BrowserWindowWatcher = {
     }
   },
 
-  patchToFullScreenModules(win) {
-    const FullScreen = win.FullScreen;
-    const sidebarMainBox = win.document.querySelector('#sidebar-main');
-    const sidebarBox = win.document.querySelector('#sidebar-box');
-    const tabsSidebarBox = win.document.querySelector('#tabs-sidebar-box');
-
-    if (!FullScreen.__ws_orig__toggle)
-      FullScreen.__ws_orig__toggle = FullScreen.toggle;
-    FullScreen.toggle = function(...args) {
-      const retval = this.__ws_orig__toggle(...args);
-      const enterFS = win.fullScreen;
-
-      if (enterFS) {
-       if (!win.document.fullscreenElement) {
-          if (win.gNavToolbox.getAttribute('fullscreenShouldAnimate') == 'true')
-            tabsSidebarBox.setAttribute('fullscreenShouldAnimate', true);
-
-          FullScreen.__ws_sidebar.hide();
-       }
-      }
-      else {
-        FullScreen.__ws_sidebar.show({ exitting: true });
-        FullScreen.__ws_sidebar.cleanup();
-      }
-
-      return retval;
-    };
-
-    if (!FullScreen.__ws_orig__keyToggleCallback && FullScreen._keyToggleCallback) {
-      FullScreen.__ws_orig__keyToggleCallback = FullScreen._keyToggleCallback;
-      FullScreen._keyToggleCallback = function(event, ...args) {
-        if (event.keyCode == event.DOM_VK_ESCAPE) {
-          FullScreen.__ws_sidebar.hide();
-        }
-        else if (event.keyCode == event.DOM_VK_F6) {
-          FullScreen.__ws_sidebar.show();
-        }
-        return FullScreen.__ws_orig__keyToggleCallback(event, ...args);
-      };
-    }
-
-    if (!FullScreen.__ws_sidebar) {
-      FullScreen.__ws_sidebar = {
-        isRightSide() {
-          return win.document.documentElement.classList.contains('tabs-sidebar-right');
-        },
-
-        updateMouseTargetRect() {
-          const contentsAreaRect = win.gBrowser.tabpanels.getBoundingClientRect();
-          const tabsSidebarBoxRect = tabsSidebarBox.getBoundingClientRect();
-          const sidebarMainBoxRect = sidebarMainBox.getBoundingClientRect();
-          const sidebarBoxRect = sidebarBox.getBoundingClientRect();
-          const isRight = this.isRightSide();
-          this._mouseTargetRect = {
-            top:    contentsAreaRect.top,
-            bottom: contentsAreaRect.bottom,
-            left:   Math.min(sidebarMainBoxRect.left, sidebarBoxRect.left, contentsAreaRect.left) + (isRight ? 0 : tabsSidebarBoxRect.width + 50),
-            right:  Math.max(sidebarMainBoxRect.right, sidebarBoxRect.right, contentsAreaRect.right) - (isRight ? tabsSidebarBoxRect.width + 50 : 0),
-          };
-          win.MousePosTracker.addListener(this);
-        },
-
-        hide() {
-          if (this.isRightSide())
-            tabsSidebarBox.style.marginRight = `-${tabsSidebarBox.getBoundingClientRect().width}px`;
-          else
-            tabsSidebarBox.style.marginLeft = `-${tabsSidebarBox.getBoundingClientRect().width}px`;
-
-          win.MousePosTracker.removeListener(this);
-          this.startListenToShow();
-        },
-
-        show({ exitting } = {}) {
-          tabsSidebarBox.removeAttribute('fullscreenShouldAnimate');
-          tabsSidebarBox.style.marginLeft = tabsSidebarBox.style.marginRight = '';
-
-          this.endListenToShow();
-          if (!exitting) {
-            this.updateMouseTargetRect();
-          }
-        },
-
-        cleanup() {
-          win.MousePosTracker.removeListener(this);
-          this.endListenToShow();
-        },
-
-        startListenToShow() {
-          if (this.listeningToShow)
-            return;
-          this.listeningToShow = true;
-        },
-
-        endListenToShow() {
-          if (!this.listeningToShow)
-            return;
-          this.listeningToShow = false;
-        },
-
-        handleEvent(_event) {
-          this.show();
-        },
-
-        getMouseTargetRect() {
-          return this._mouseTargetRect;
-        },
-
-        onMouseEnter() {
-          this.hide();
-        },
-      };
-    }
-  },
-
-  unpatchFullScreenModules(win) {
-    const FullScreen = win.FullScreen;
-
-    if (FullScreen.__ws_orig__toggle) {
-      FullScreen.toggle = FullScreen.__ws_orig__toggle;
-      FullScreen.__ws_orig__toggle = null;
-    }
-
-    if (FullScreen.__ws_orig__keyToggleCallback) {
-      FullScreen._keyToggleCallback = FullScreen.__ws_orig__keyToggleCallback;
-      FullScreen.__ws_orig__keyToggleCallback = null;
-    }
-
-    if (FullScreen.__ws_sidebar) {
-      FullScreen.__ws_sidebar.cleanup();
-      FullScreen.__ws_sidebar = null;
-    }
-  },
-
   updateToggleButton(document, button) {
     button = button || document.querySelector('#toggle-tabs-sidebar');
     if (!button)
@@ -923,11 +455,6 @@ const BrowserWindowWatcher = {
       button.setAttribute('tooltiptext', this.locale.get('openButton_tooltip'));
       viewMenuItem.removeAttribute('checked');
     }
-  },
-
-  updateTabsSidebarPositionIn(document) {
-    const isRight = Services.prefs.getStringPref(`${this.BASE_PREF}sidebarPosition`, '') == '2';
-    document.documentElement.classList.toggle('tabs-sidebar-right', isRight);
   },
 
   *iteratePlacesOwnerWindows() {
@@ -1006,10 +533,12 @@ const BrowserWindowWatcher = {
 
   openTabsSidebar(document) {
     const box = document.querySelector('#tabs-sidebar-box');
-    box.setAttribute('shown', true);
     box.removeAttribute('hidden');
-    Services.xulStore.persist(box, 'shown');
     Services.xulStore.removeValue(document.URL, box.id, 'hidden');
+
+    const nativeVerticalTabs = document.querySelector('#vertical-tabs');
+    nativeVerticalTabs.setAttribute('hidden', true);
+    nativeVerticalTabs.removeAttribute('visible');
 
     for (const listener of this.sidebarShownListeners) {
       listener(document.defaultView);
@@ -1018,10 +547,12 @@ const BrowserWindowWatcher = {
 
   closeTabsSidebar(document) {
     const box = document.querySelector('#tabs-sidebar-box');
-    box.removeAttribute('shown');
     box.setAttribute('hidden', true);
-    Services.xulStore.removeValue(document.URL, box.id, 'shown');
     Services.xulStore.persist(box, 'hidden');
+
+    const nativeVerticalTabs = document.querySelector('#vertical-tabs');
+    nativeVerticalTabs.removeAttribute('hidden');
+    nativeVerticalTabs.setAttribute('visible', '');
 
     for (const listener of this.sidebarHiddenListeners) {
       listener(document.defaultView);
@@ -1031,66 +562,12 @@ const BrowserWindowWatcher = {
   handleEvent(event) {
     const win = event.target.ownerDocument?.defaultView || event.target.defaultView;
     switch (event.type) {
-      case 'SidebarShown':
-        this.updateTabsSidebarPositionIn(event.currentTarget);
-        break;
-
-      case 'popupshowing':
-        switch (event.target.id) {
-          case 'tabs-sidebar-options-menupopup':
-            this.updateOptionsPopup(event.target);
-            break;
-        }
-        break;
-
       case 'command':
         switch (event.target.id) {
           case 'toggle-tabs-sidebar':
           case 'toggle-tabs-sidebar-command':
           case 'viewmenu-toggle-tabs-sidebar':
-          case 'tabs-sidebar-close':
             this.toggleTabsToolbar(event.target.ownerDocument);
-            break;
-
-          case 'tabs-sidebar-moveLeft':
-            Services.prefs.setStringPref(`${this.BASE_PREF}sidebarPosition`, '1');
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-moveRight':
-            Services.prefs.setStringPref(`${this.BASE_PREF}sidebarPosition`, '2');
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-newTab':
-            for (const listener of this.menuCommandListeners) {
-              listener(event);
-            }
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-reloadTab':
-          case 'tabs-sidebar-reloadTabs':
-            win.gBrowser.reloadMultiSelectedTabs(); // same to #toolbar-context-reloadSelectedTab / #toolbar-context-reloadSelectedTabs
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-bookmarkTab':
-          case 'tabs-sidebar-bookmarkTabs': {
-            const pages = win.PlacesCommandHook.getUniquePages(win.gBrowser.selectedTabs)
-              .map(page => Object.assign(page, { uri: Services.io.createExposableURI(page.uri) }));
-            win.PlacesUIUtils.showBookmarkPagesDialog(pages); // same to #toolbar-context-bookmarkSelectedTab / #toolbar-context-bookmarkSelectedTabs
-            this.tryHidePopup(event);
-          }; break;
-
-          case 'tabs-sidebar-selectAll':
-            win.gBrowser.selectAllTabs(); // same to #toolbar-context-selectAllTabs
-            this.tryHidePopup(event);
-            break;
-
-          case 'tabs-sidebar-undoClose':
-            win.undoCloseTab(); // same to #toolbar-context-undoCloseTab
-            this.tryHidePopup(event);
             break;
 
           case 'tabs-sidebar-moreOptions':
@@ -1228,15 +705,6 @@ const BrowserWindowWatcher = {
 
   onPrefChanged(name) {
     switch (name) {
-      case 'sidebar.position_start':
-      case `${this.BASE_PREF}sidebarPosition`: {
-        const windows = Services.wm.getEnumerator('navigator:browser');
-        while (windows.hasMoreElements()) {
-          const win = windows.getNext()/*.QueryInterface(Components.interfaces.nsIDOMWindow)*/;
-          this.updateTabsSidebarPositionIn(win.document)
-        }
-      }; break;
-
       case `${this.BASE_PREF}hideHorizontalTabsWhileActive`: {
         const windows = Services.wm.getEnumerator('navigator:browser');
         while (windows.hasMoreElements()) {
