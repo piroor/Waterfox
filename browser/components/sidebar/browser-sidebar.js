@@ -602,6 +602,9 @@ var SidebarController = {
       if (document.querySelector("#tree-vertical-tabs")) {
         return;
       }
+      if (addon.userDisabled) {
+        addon.enable({ allowSystemAddons: true });
+      }
       await addon.startupPromise;
       Services.prefs.setBoolPref("sidebar.revamp", true);
       Services.prefs.setBoolPref("sidebar.verticalTabs", true);
@@ -685,6 +688,19 @@ var SidebarController = {
 
       const event = new CustomEvent("TreeVerticalTabsHidden", { bubbles: true });
       treeVerticalTabsBox.dispatchEvent(event);
+
+      const browserWindows = Services.wm.getEnumerator('navigator:browser');
+      let shown = false;
+      while (browserWindows.hasMoreElements()) {
+        const win = browserWindows.getNext();
+        if (win.document.querySelector("#tree-vertical-tabs-box[shown='true']")) {
+          shown = true;
+          break;
+        }
+      }
+      if (!shown) {
+        addon.disable({ allowSystemAddons: true });
+      }
     }
   },
 
