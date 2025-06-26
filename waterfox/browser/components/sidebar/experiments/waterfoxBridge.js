@@ -115,7 +115,6 @@ const BrowserWindowWatcher = {
 
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('initialized', 'true');
-      tabsSidebarElement.addEventListener('load', this, { capture: true });
       tabsSidebarElement.addEventListener('dragover', this, { capture: true });
     } else {
       console.error('WaterfoxBridge: #tree-vertical-tabs element not found. Cannot attach event listeners or load panel.');
@@ -149,7 +148,6 @@ const BrowserWindowWatcher = {
     const tabsSidebarElement = document.querySelector('#tree-vertical-tabs');
     if (tabsSidebarElement?.getAttribute('initialized') == 'true') {
       tabsSidebarElement.removeAttribute('initialized');
-      tabsSidebarElement.removeEventListener('load', this, { capture: true });
       tabsSidebarElement.removeEventListener('dragover', this, { capture: true });
     }
   },
@@ -248,22 +246,6 @@ const BrowserWindowWatcher = {
           listener(event.target.ownerDocument.defaultView);
         }
         break;
-
-      case 'load': {
-        const tabsSidebarElement = event.currentTarget;
-        const win = tabsSidebarElement.contentWindow;
-        if (win &&
-            win.location.href == 'chrome://browser/content/webext-panels.xhtml') {
-          win.document.querySelector('*|sidebar-panel-header').hidden = true;
-          win.loadPanel(
-            this.EXTENSION_ID,
-            `${this.BASE_URL}sidebar/sidebar.html`,
-            false
-          );
-        } else {
-          console.error('WaterfoxBridge: #tree-vertical-tabs contentWindow is not available.');
-        }
-      }; break;
 
       case 'dragover': {
         const tabsSidebarElement = event.currentTarget;

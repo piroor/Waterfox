@@ -589,32 +589,49 @@ var SidebarController = {
   /**
    * Toggle the vertical tabs preference.
    */
-  toggleTreeVerticalTabs() {
+  async toggleTreeVerticalTabs(shouldShow) {
     const treeVerticalTabs = document.querySelector("#tree-vertical-tabs");
     const treeVerticalTabsBox = document.querySelector("#tree-vertical-tabs-box");
     const verticalTabs = document.querySelector("#vertical-tabs");
-    const shouldShow = treeVerticalTabsBox.getAttribute("hidden") == "true";
+    shouldShow ??= treeVerticalTabsBox.getAttribute("hidden") == "true";
     const command = document.querySelector("#toggle-tree-vertical-tabs-command");
+    const addon = await AddonManager.getAddonByID("sidebar@waterfox.net");
     if (shouldShow) {
+      await addon.startupPromise;
       Services.prefs.setBoolPref("sidebar.revamp", true);
       Services.prefs.setBoolPref("sidebar.verticalTabs", true);
 
-      treeVerticalTabs.setAttribute("src", "chrome://browser/content/webext-panels.xhtml");
       treeVerticalTabsBox.removeAttribute("hidden");
+      treeVerticalTabsBox.setAttribute("shown", true);
       Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "hidden");
+      Services.xulStore.persist(treeVerticalTabsBox, "shown");
 
       command.setAttribute("checked", true);
 
       verticalTabs.setAttribute("hidden", true);
       verticalTabs.removeAttribute("visible");
 
+      const policy = WebExtensionPolicy.getByID("sidebar@waterfox.net");
+      treeVerticalTabs.setAttribute("initialBrowsingContextGroupId", policy.browsingContextGroupId);
+      const sidebarPanelUrl = policy.getURL("sidebar/sidebar.html");
+      const uri = Services.io.newURI(sidebarPanelUrl);
+      const triggeringPrincipal =
+        Services.scriptSecurityManager.createContentPrincipal(uri, {});
+      treeVerticalTabs.fixupAndLoadURIString(sidebarPanelUrl, { triggeringPrincipal });
+
       const event = new CustomEvent("TreeVerticalTabsShown", { bubbles: true });
       treeVerticalTabsBox.dispatchEvent(event);
     }
     else {
-      treeVerticalTabs.setAttribute("src", "about:blank");
+      const uri = Services.io.newURI("about:blank");
+      const triggeringPrincipal =
+        Services.scriptSecurityManager.createContentPrincipal(uri, {});
+      treeVerticalTabs.fixupAndLoadURIString("about:blank", { triggeringPrincipal });
+
       treeVerticalTabsBox.setAttribute("hidden", true);
+      treeVerticalTabsBox.removeAttribute("shown");
       Services.xulStore.persist(treeVerticalTabsBox, "hidden");
+      Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "shown");
 
       command.removeAttribute("checked");
 
@@ -903,6 +920,10 @@ var SidebarController = {
     if (this.inSingleTabWindow) {
       this._state.launcherVisible = false;
       return;
+    }
+
+    if (Services.xulStore.getValue(document.URL, 'tree-vertical-tabs-box', 'shown') == 'true') {
+      this.toggleTreeVerticalTabs();
     }
 
     let sourceWindow = window.opener;

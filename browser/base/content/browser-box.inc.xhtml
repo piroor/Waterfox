@@ -11,12 +11,20 @@
            orient="vertical"
            hidden="true">
         <browser id="tree-vertical-tabs"
+                 type="content"
+                 flex="1"
                  autoscroll="false"
-                 context="contentAreaContextMenu"
                  disablehistory="true"
+                 disableglobalhistory="true"
                  disablefullscreen="true"
+                 messagemanagergroup="webext-browsers"
+                 webextension-view-type="sidebar"
+                 context="contentAreaContextMenu"
                  tooltip="aHTMLTooltip"
-                 src="about:blank"/>
+                 autocompletepopup="PopupAutoComplete"
+                 transparent="true"
+                 remote="true"
+                 maychangeremoteness="true"/>
       </box>
     </html:sidebar-main>
   </box>
