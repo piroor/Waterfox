@@ -62,7 +62,7 @@ export default class TabHoverPreviewPanel {
     this._panelOpener = new TabPreviewPanelTimedFunction(
       () => {
         if (!this._isDisabled()) {
-          if (Services.xulStore.getValue(this._win?.document?.URL, 'tree-tabs-box', 'hidden') != 'true' &&
+          if (Services.xulStore.getValue(this._win?.document?.URL, 'tree-vertical-tabs-box', 'hidden') != 'true' &&
               typeof this.__ws__top == 'number') {
             const [x, y] = this.calculateCoordinatesForVertical();
             this._panel.openPopupAtScreen(x, y, false);
@@ -173,14 +173,14 @@ export default class TabHoverPreviewPanel {
   }
 
   calculateCoordinatesForVertical() {
-    const tabsSidebar = this._win.document.querySelector('#tree-tabs');
-    const tabsSidebarRect = tabsSidebar.getBoundingClientRect();
+    const treeVerticalTabs = this._win.document.querySelector('#tree-vertical-tabs');
+    const treeVerticalTabsRect = treeVerticalTabs.getBoundingClientRect();
     const align = Services.prefs.getBoolPref('sidebar.position_start') ? 'left' : 'right';
     const previewRect = this._panel.getBoundingClientRect();
     const x = align == 'left' ?
-      tabsSidebar.screenX + tabsSidebarRect.width - 2 :
-      tabsSidebar.screenX - previewRect.width + 2;
-    const y = Math.min(tabsSidebar.screenY + this.__ws__top, tabsSidebar.screenY + tabsSidebarRect.height - previewRect.height);
+      treeVerticalTabs.screenX + treeVerticalTabsRect.width - 2 :
+      treeVerticalTabs.screenX - previewRect.width + 2;
+    const y = Math.min(treeVerticalTabs.screenY + this.__ws__top, treeVerticalTabs.screenY + treeVerticalTabsRect.height - previewRect.height);
     return [x, y];
   }
 
@@ -289,7 +289,7 @@ export default class TabHoverPreviewPanel {
 
   _movePanel() {
     if (this._tab) {
-      if (Services.xulStore.getValue(this._win.document.URL, 'tree-tabs-box', 'hidden') != 'true' &&
+      if (Services.xulStore.getValue(this._win.document.URL, 'tree-vertical-tabs-box', 'hidden') != 'true' &&
           typeof this.__ws__top == 'number') {
         const [x, y] = this.calculateCoordinatesForVertical();
         this._panel.moveTo(x, y);

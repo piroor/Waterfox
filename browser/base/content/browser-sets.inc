@@ -112,7 +112,7 @@
     <command id="zoomWindow" data-l10n-id="window-zoom-command" />
 #endif
 
-    <command id="toggle-tree-tabs-command"/>
+    <command id="toggle-tree-vertical-tabs-command"/>
   </commandset>
 #include ../../components/places/content/placesCommands.inc.xhtml
 
@@ -406,7 +406,6 @@
          internal="true"/>
 #endif
 
-    <key id="toggle-tree-tabs-key"
-         keycode="VK_F1"
-         command="toggle-tree-tabs-command"/>
+    <key id="toggle-tree-vertical-tabs-key"
+         keycode="VK_F1"/>
   </keyset>

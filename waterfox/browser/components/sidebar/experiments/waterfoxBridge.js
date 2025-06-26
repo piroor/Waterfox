@@ -74,6 +74,8 @@ const BrowserWindowWatcher = {
         win.addEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.addEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.addEventListener('visibilitychange', this);
+        win.addEventListener('TreeVerticalTabsShown', this);
+        win.addEventListener('TreeVerticalTabsHidden', this);
       }
       return installed;
     }
@@ -96,6 +98,8 @@ const BrowserWindowWatcher = {
         win.removeEventListener('DOMAudioPlaybackBlockStarted', this, { capture: true });
         win.removeEventListener('DOMAudioPlaybackBlockStopped', this, { capture: true });
         win.removeEventListener('visibilitychange', this);
+        win.removeEventListener('TreeVerticalTabsShown', this);
+        win.removeEventListener('TreeVerticalTabsHidden', this);
       }
       catch(_error) {
       }
@@ -105,43 +109,16 @@ const BrowserWindowWatcher = {
   installTabsSidebar(win) {
     const document = win.document;
 
-    const tabsSidebarElement = document.querySelector('#tree-tabs');
+    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs');
     if (tabsSidebarElement?.getAttribute('initialized') == 'true')
       return true;
 
     if (tabsSidebarElement) {
       tabsSidebarElement.setAttribute('initialized', 'true');
-      tabsSidebarElement.setAttribute('src', 'chrome://browser/content/webext-panels.xhtml');
-
-      tabsSidebarElement.addEventListener('load', () => {
-        // Ensure contentWindow is available before calling loadPanel
-        const win = tabsSidebarElement.contentWindow;
-        if (win) {
-          win.document.querySelector('*|sidebar-panel-header').hidden = true;
-          win.loadPanel(
-            this.EXTENSION_ID,
-            `${this.BASE_URL}sidebar/sidebar.html`,
-            false
-          );
-        } else {
-          console.error('WaterfoxBridge: #tree-tabs contentWindow is not available.');
-        }
-      }, { capture: true, once: true });
-
-      tabsSidebarElement.addEventListener('dragover', event => {
-        this.lastTransferredFiles.clear();
-        for (const file of event.dataTransfer.files) {
-          const fileInternal = Cc['@mozilla.org/file/local;1']
-            .createInstance(Components.interfaces.nsIFile);
-          fileInternal.initWithPath(file.mozFullPath);
-          const url = Services.io.getProtocolHandler('file')
-            .QueryInterface(Components.interfaces.nsIFileProtocolHandler)
-            .getURLSpecFromActualFile(fileInternal);
-          this.lastTransferredFiles[this.getKeyFromFile(file)] = url;
-        }
-      }, { capture: true });
+      tabsSidebarElement.addEventListener('load', this, { capture: true });
+      tabsSidebarElement.addEventListener('dragover', this, { capture: true });
     } else {
-      console.error('WaterfoxBridge: #tree-tabs element not found. Cannot attach event listeners or load panel.');
+      console.error('WaterfoxBridge: #tree-vertical-tabs element not found. Cannot attach event listeners or load panel.');
     }
 
     document.addEventListener('command', this);
@@ -163,42 +140,29 @@ const BrowserWindowWatcher = {
     return this.lastTransferredFiles[this.getKeyFromFile(file)];
   },
 
-  shouldShowSidebar(document) {
-    // it should be hidden by default, as a built-in feature of Waterfox
-    return Services.xulStore.getValue(document.URL, 'tree-tabs-box', 'hidden') != 'true';
-  },
-
   uninstallTabsSidebar(win) {
     const document = win.document;
 
     document.removeEventListener('command', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
-    const tabsSidebarElement = document.querySelector('#tree-tabs');
-    if (tabsSidebarElement) {
-      tabsSidebarElement.setAttribute('src', 'about:blank');
+    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs');
+    if (tabsSidebarElement?.getAttribute('initialized') == 'true') {
+      tabsSidebarElement.removeAttribute('initialized');
+      tabsSidebarElement.removeEventListener('load', this, { capture: true });
+      tabsSidebarElement.removeEventListener('dragover', this, { capture: true });
     }
   },
 
   updateToggleButton(document, button) {
-    button = button || document.querySelector('#toggle-tree-tabs');
+    button = button || document.querySelector('#toggle-tree-vertical-tabs');
     if (!button)
       return;
 
     button.removeAttribute('disabled');
-
-    const viewMenuItem = document.querySelector('#viewmenu-toggle-tree-tabs');
-    if (this.shouldShowSidebar(document)) {
-      button.setAttribute('checked', true);
-      viewMenuItem.setAttribute('checked', true);
-    }
-    else {
-      button.removeAttribute('checked');
-      viewMenuItem.removeAttribute('checked');
-    }
   },
 
-  *iteratePlacesOwnerWindows() {
+  *iterateTargetWindows() {
     const browserWindows = Services.wm.getEnumerator('navigator:browser');
     while (browserWindows.hasMoreElements()) {
       const win = browserWindows.getNext()/*.QueryInterface(Components.interfaces.nsIDOMWindow)*/
@@ -207,13 +171,6 @@ const BrowserWindowWatcher = {
       if (sidebar)
         yield sidebar.contentWindow;
     }
-
-    const organizerWindows = Services.wm.getEnumerator('Places:Organizer');
-    while (organizerWindows.hasMoreElements()) {
-      const win = organizerWindows.getNext()/*.QueryInterface(Components.interfaces.nsIDOMWindow)*/
-      yield win;
-    }
-
     return;
   },
 
@@ -241,55 +198,15 @@ const BrowserWindowWatcher = {
       });
   },
 
-  toggleTabsToolbar(document) {
-    const shouldOpen = document.querySelector('#tree-tabs-box').getAttribute('hidden') == 'true';
-    if (shouldOpen)
-      this.openTabsSidebar(document);
-    else
-      this.closeTabsSidebar(document);
-    this.updateToggleButton(document);
-  },
-
-  openTabsSidebar(document) {
-    Services.prefs.setBoolPref('sidebar.revamp', true);
-    Services.prefs.setBoolPref('sidebar.verticalTabs', true);
-
-    const box = document.querySelector('#tree-tabs-box');
-    box.removeAttribute('hidden');
-    Services.xulStore.removeValue(document.URL, box.id, 'hidden');
-
-    const nativeVerticalTabs = document.querySelector('#vertical-tabs');
-    nativeVerticalTabs.setAttribute('hidden', true);
-    nativeVerticalTabs.removeAttribute('visible');
-
-    for (const listener of this.sidebarShownListeners) {
-      listener(document.defaultView);
-    }
-  },
-
-  closeTabsSidebar(document) {
-    const box = document.querySelector('#tree-tabs-box');
-    box.setAttribute('hidden', true);
-    Services.xulStore.persist(box, 'hidden');
-
-    const nativeVerticalTabs = document.querySelector('#vertical-tabs');
-    nativeVerticalTabs.removeAttribute('hidden');
-    nativeVerticalTabs.setAttribute('visible', '');
-
-    for (const listener of this.sidebarHiddenListeners) {
-      listener(document.defaultView);
-    }
-  },
-
   handleEvent(event) {
     const win = event.target.ownerDocument?.defaultView || event.target.defaultView;
     switch (event.type) {
       case 'command':
         switch (event.target.id) {
-          case 'toggle-tree-tabs':
-          case 'toggle-tree-tabs-command':
-          case 'viewmenu-toggle-tree-tabs':
-            this.toggleTabsToolbar(event.target.ownerDocument);
+          case 'toggle-tree-vertical-tabs':
+          case 'toggle-tree-vertical-tabs-command':
+          case 'viewmenu-toggle-tree-vertical-tabs':
+            this.updateToggleButton(event.target.ownerDocument);
             break;
         }
         break;
@@ -319,6 +236,48 @@ const BrowserWindowWatcher = {
           listener(event.currentTarget);
         }
         break;
+
+      case 'TreeVerticalTabsShown':
+        for (const listener of this.sidebarShownListeners) {
+          listener(event.target.ownerDocument.defaultView);
+        }
+        break;
+
+      case 'TreeVerticalTabsHidden':
+        for (const listener of this.sidebarHiddenListeners) {
+          listener(event.target.ownerDocument.defaultView);
+        }
+        break;
+
+      case 'load': {
+        const tabsSidebarElement = event.currentTarget;
+        const win = tabsSidebarElement.contentWindow;
+        if (win &&
+            win.location.href == 'chrome://browser/content/webext-panels.xhtml') {
+          win.document.querySelector('*|sidebar-panel-header').hidden = true;
+          win.loadPanel(
+            this.EXTENSION_ID,
+            `${this.BASE_URL}sidebar/sidebar.html`,
+            false
+          );
+        } else {
+          console.error('WaterfoxBridge: #tree-vertical-tabs contentWindow is not available.');
+        }
+      }; break;
+
+      case 'dragover': {
+        const tabsSidebarElement = event.currentTarget;
+        this.lastTransferredFiles.clear();
+        for (const file of event.dataTransfer.files) {
+          const fileInternal = Cc['@mozilla.org/file/local;1']
+            .createInstance(Components.interfaces.nsIFile);
+          fileInternal.initWithPath(file.mozFullPath);
+          const url = Services.io.getProtocolHandler('file')
+            .QueryInterface(Components.interfaces.nsIFileProtocolHandler)
+            .getURLSpecFromActualFile(fileInternal);
+          this.lastTransferredFiles[this.getKeyFromFile(file)] = url;
+        }
+      }; break;
     }
   },
   tryHidePopup(event) {
@@ -388,10 +347,6 @@ const BrowserWindowWatcher = {
           .addEventListener('DOMContentLoaded', () => {
             this.handleWindow(subject);
           }, { once: true });
-        break;
-
-      case 'nsPref:changed':
-        this.onPrefChanged(data);
         break;
     }
   },
@@ -517,32 +472,13 @@ this.waterfoxBridge = class extends ExtensionAPI {
           Services.ww.registerNotification(BrowserWindowWatcher);
 
           // handle already opened browser windows
-          const windows = BrowserWindowWatcher.iteratePlacesOwnerWindows();
+          const windows = BrowserWindowWatcher.iterateTargetWindows();
           while (true) {
             const win = windows.next();
             if (win.done)
               break;
             BrowserWindowWatcher.handleWindow(win.value);
           }
-
-          // support drag and drop of tabs from sidebar to bookmarks toolbar
-          if (!lazy.PlacesUtils.__ws_orig__unwrapNodes)
-            lazy.PlacesUtils.__ws_orig__unwrapNodes = lazy.PlacesUtils.unwrapNodes;
-          lazy.PlacesUtils.unwrapNodes = function(blob, type) {
-            if (type == TYPE_TREE) {
-              const nodes = [];
-              const data = JSON.parse(blob);
-              for (const tab of data.tabs) {
-                nodes.push({
-                  uri:   tab.url,
-                  title: tab.title,
-                  type:  'text/x-moz-url',
-                });
-              }
-              return nodes;
-            }
-            return this.__ws_orig__unwrapNodes(blob, type);
-          };
 
           // grant special permissions by default
           if (!Services.prefs.getBoolPref(`${BrowserWindowWatcher.BASE_PREF}permissionsGranted`, false)) {
@@ -949,8 +885,6 @@ this.waterfoxBridge = class extends ExtensionAPI {
       lazy.PlacesUtils.__ws_orig__unwrapNodes = null;
     }
 
-    lazy.CustomizableUI.destroyWidget(BrowserWindowWatcher.id);
-
     const registrar = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar);
     registrar.unregisterFactory(
       BrowserWindowWatcher.classID,
@@ -964,7 +898,7 @@ this.waterfoxBridge = class extends ExtensionAPI {
 
     Services.ww.unregisterNotification(BrowserWindowWatcher);
 
-    const windows = BrowserWindowWatcher.iteratePlacesOwnerWindows();
+    const windows = BrowserWindowWatcher.iterateTargetWindows();
     while (true) {
       const win = windows.next();
       if (win.done)

@@ -1054,7 +1054,7 @@ tabs-toolbar =
 tabs-toolbar-new-tab =
     .label = New Tab
 
-tabs-toolbar-toggle-tree-tabs =
+tabs-toolbar-toggle-tree-vertical-tabs =
     .label = Tree Vertical Tabs
     .tooltiptext-open = Toggle Tree Vertical Tabs
 

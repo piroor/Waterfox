@@ -1297,6 +1297,17 @@ export var PlacesUtils = {
         }
         break;
       }
+      case this.TYPE_X_WS_TREE: {
+        const data = JSON.parse(blob);
+        for (const tab of data.tabs) {
+          validNodes.push({
+            uri:   tab.url,
+            title: tab.title,
+            type:  "text/x-moz-url",
+          });
+        }
+        break;
+      }
       default:
         throw Components.Exception("", Cr.NS_ERROR_INVALID_ARG);
     }

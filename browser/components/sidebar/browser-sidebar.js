@@ -370,7 +370,7 @@ var SidebarController = {
         // registerExtension() already creates menu items for extensions.
         const menuitem = this.createMenuItem(commandID, sidebar);
         //menubar.appendChild(menuitem);
-        menubar.insertBefore(menuitem, menubar.querySelector('#viewmenu-tree-tabs-separator'));
+        menubar.insertBefore(menuitem, menubar.querySelector('#viewmenu-tree-vertical-tabs-separator'));
       }
     }
     if (this._mainResizeObserver) {
@@ -584,6 +584,48 @@ var SidebarController = {
       "sidebar.verticalTabs",
       !this.sidebarVerticalTabsEnabled
     );
+  },
+
+  /**
+   * Toggle the vertical tabs preference.
+   */
+  toggleTreeVerticalTabs() {
+    const treeVerticalTabs = document.querySelector("#tree-vertical-tabs");
+    const treeVerticalTabsBox = document.querySelector("#tree-vertical-tabs-box");
+    const verticalTabs = document.querySelector("#vertical-tabs");
+    const shouldShow = treeVerticalTabsBox.getAttribute("hidden") == "true";
+    const command = document.querySelector("#toggle-tree-vertical-tabs-command");
+    if (shouldShow) {
+      Services.prefs.setBoolPref("sidebar.revamp", true);
+      Services.prefs.setBoolPref("sidebar.verticalTabs", true);
+
+      treeVerticalTabs.setAttribute("src", "chrome://browser/content/webext-panels.xhtml");
+      treeVerticalTabsBox.removeAttribute("hidden");
+      Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "hidden");
+
+      command.setAttribute("checked", true);
+
+      verticalTabs.setAttribute("hidden", true);
+      verticalTabs.removeAttribute("visible");
+
+      const event = new CustomEvent("TreeVerticalTabsShown", { bubbles: true });
+      treeVerticalTabsBox.dispatchEvent(event);
+    }
+    else {
+      treeVerticalTabs.setAttribute("src", "about:blank");
+      treeVerticalTabsBox.setAttribute("hidden", true);
+      Services.xulStore.persist(treeVerticalTabsBox, "hidden");
+
+      command.removeAttribute("checked");
+
+      verticalTabs.removeAttribute("hidden");
+      if (Services.prefs.getBoolPref("sidebar.verticalTabs")) {
+        verticalTabs.setAttribute("visible", "");
+      }
+
+      const event = new CustomEvent("TreeVerticalTabsHidden", { bubbles: true });
+      treeVerticalTabsBox.dispatchEvent(event);
+    }
   },
 
   /**
@@ -1508,7 +1550,8 @@ var SidebarController = {
 
     // Insert a menuitem for View->Show Sidebars.
     const menuitem = this.createMenuItem(commandID, sidebar);
-    document.getElementById("viewSidebarMenu").appendChild(menuitem);
+    //document.getElementById("viewSidebarMenu").appendChild(menuitem);
+    document.getElementById("viewSidebarMenu").insertBefore(menuitem, document.querySelector('#viewmenu-tree-vertical-tabs-separator'));
     this.addOrUpdateExtension(commandID, sidebar);
 
     if (!this.sidebarRevampEnabled) {
