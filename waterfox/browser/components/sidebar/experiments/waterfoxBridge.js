@@ -109,7 +109,7 @@ const BrowserWindowWatcher = {
   installTabsSidebar(win) {
     const document = win.document;
 
-    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs');
+    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs-box');
     if (tabsSidebarElement?.getAttribute('initialized') == 'true')
       return true;
 
@@ -145,7 +145,7 @@ const BrowserWindowWatcher = {
     document.removeEventListener('command', this);
     document.removeEventListener('customizationchange', this, { capture: true });
 
-    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs');
+    const tabsSidebarElement = document.querySelector('#tree-vertical-tabs-box');
     if (tabsSidebarElement?.getAttribute('initialized') == 'true') {
       tabsSidebarElement.removeAttribute('initialized');
       tabsSidebarElement.removeEventListener('dragover', this, { capture: true });

@@ -580,6 +580,9 @@ var SidebarController = {
    * Toggle the vertical tabs preference.
    */
   toggleVerticalTabs() {
+    if (this.sidebarVerticalTabsEnabled) {
+      this.toggleTreeVerticalTabs(false);
+    }
     Services.prefs.setBoolPref(
       "sidebar.verticalTabs",
       !this.sidebarVerticalTabsEnabled
@@ -590,13 +593,15 @@ var SidebarController = {
    * Toggle the vertical tabs preference.
    */
   async toggleTreeVerticalTabs(shouldShow) {
-    const treeVerticalTabs = document.querySelector("#tree-vertical-tabs");
     const treeVerticalTabsBox = document.querySelector("#tree-vertical-tabs-box");
     const verticalTabs = document.querySelector("#vertical-tabs");
     shouldShow ??= treeVerticalTabsBox.getAttribute("hidden") == "true";
     const command = document.querySelector("#toggle-tree-vertical-tabs-command");
     const addon = await AddonManager.getAddonByID("sidebar@waterfox.net");
     if (shouldShow) {
+      if (document.querySelector("#tree-vertical-tabs")) {
+        return;
+      }
       await addon.startupPromise;
       Services.prefs.setBoolPref("sidebar.revamp", true);
       Services.prefs.setBoolPref("sidebar.verticalTabs", true);
@@ -612,21 +617,59 @@ var SidebarController = {
       verticalTabs.removeAttribute("visible");
 
       const policy = WebExtensionPolicy.getByID("sidebar@waterfox.net");
+
+      const treeVerticalTabs = document.createXULElement("browser");
+      treeVerticalTabs.setAttribute("id", "tree-vertical-tabs");
+      treeVerticalTabs.setAttribute("type", "content");
+      treeVerticalTabs.setAttribute("flex", "1");
+      treeVerticalTabs.setAttribute("disableglobalhistory", "true");
+      treeVerticalTabs.setAttribute("messagemanagergroup", "webext-browsers");
+      treeVerticalTabs.setAttribute("webextension-view-type", "sidebar");
+      treeVerticalTabs.setAttribute("context", "contentAreaContextMenu");
+      treeVerticalTabs.setAttribute("tooltip", "aHTMLTooltip");
+      treeVerticalTabs.setAttribute("autocompletepopup", "PopupAutoComplete");
+      treeVerticalTabs.setAttribute("transparent", "true");
+      treeVerticalTabs.setAttribute("remote", "true");
+      treeVerticalTabs.setAttribute("remoteType", "extension");
+      treeVerticalTabs.setAttribute("maychangeremoteness", "true");
+      treeVerticalTabs.setAttribute("remoteType", "extension");
+      treeVerticalTabs.setAttribute("transparent", "true");
       treeVerticalTabs.setAttribute("initialBrowsingContextGroupId", policy.browsingContextGroupId);
-      const sidebarPanelUrl = policy.getURL("sidebar/sidebar.html");
-      const uri = Services.io.newURI(sidebarPanelUrl);
-      const triggeringPrincipal =
-        Services.scriptSecurityManager.createContentPrincipal(uri, {});
-      treeVerticalTabs.fixupAndLoadURIString(sidebarPanelUrl, { triggeringPrincipal });
+
+      const { ExtensionUtils } = ChromeUtils.importESModule(
+        "resource://gre/modules/ExtensionUtils.sys.mjs"
+      );
+      const { promiseEvent } = ExtensionUtils;
+      promiseEvent(treeVerticalTabs, "XULFrameLoaderCreated").then(() => {
+        treeVerticalTabs.messageManager.loadFrameScript(
+          "chrome://extensions/content/ext-browser-content.js",
+          false,
+          true
+        );
+        treeVerticalTabs.messageManager.sendAsyncMessage("Extension:InitBrowser", {});
+
+        const sidebarPanelUrl = policy.getURL("sidebar/sidebar.html");
+        const uri = Services.io.newURI(sidebarPanelUrl);
+        const triggeringPrincipal =
+          Services.scriptSecurityManager.createContentPrincipal(uri, {});
+        treeVerticalTabs.fixupAndLoadURIString(sidebarPanelUrl, { triggeringPrincipal });
+     });
+
+      treeVerticalTabsBox.appendChild(treeVerticalTabs);
 
       const event = new CustomEvent("TreeVerticalTabsShown", { bubbles: true });
       treeVerticalTabsBox.dispatchEvent(event);
     }
     else {
+      const treeVerticalTabs = document.querySelector("#tree-vertical-tabs");
+      if (!treeVerticalTabs) {
+        return;
+      }
       const uri = Services.io.newURI("about:blank");
       const triggeringPrincipal =
         Services.scriptSecurityManager.createContentPrincipal(uri, {});
       treeVerticalTabs.fixupAndLoadURIString("about:blank", { triggeringPrincipal });
+      treeVerticalTabsBox.removeChild(treeVerticalTabs);
 
       treeVerticalTabsBox.setAttribute("hidden", true);
       treeVerticalTabsBox.removeAttribute("shown");
