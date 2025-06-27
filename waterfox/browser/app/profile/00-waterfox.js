@@ -108,7 +108,7 @@ pref("browser.tabs.toolbarposition", "topabove");
 pref("browser.bookmarks.toolbarposition", "top");
 
 // Sidebar prefs
-pref("browser.sidebar.disabled", true);
+pref("browser.sidebar.enabled", false);
 pref("browser.sidebar.autoAttach", true);
 pref("browser.sidebar.syncParentTabAndOpenerTab", true);
 pref("browser.sidebar.faviconizePinnedTabs", true);

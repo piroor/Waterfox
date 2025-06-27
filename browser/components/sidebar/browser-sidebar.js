@@ -591,15 +591,17 @@ var SidebarController = {
   async toggleTreeVerticalTabs(shouldShow) {
     const treeVerticalTabsBox = document.querySelector("#tree-vertical-tabs-box");
     const verticalTabs = document.querySelector("#vertical-tabs");
-    shouldShow ??= treeVerticalTabsBox.getAttribute("hidden") == "true";
+    shouldShow ??= !this.treeVerticalTabsBrowser;
     const addon = await AddonManager.getAddonByID("sidebar@waterfox.net");
+    if (shouldShow != this.treeVerticalTabsEnabled) {
+      Services.prefs.setBoolPref("browser.sidebar.enabled", shouldShow);
+    }
     if (shouldShow) {
       if (this.treeVerticalTabsBrowser) {
         return;
       }
       if (!addon.isActive) {
         await addon.enable({ allowSystemAddons: true });
-        Services.prefs.setBoolPref("browser.sidebar.disabled", false);
       }
       await addon.startupPromise;
       if (!Services.prefs.getBoolPref("sidebar.revamp")) {
@@ -616,8 +618,6 @@ var SidebarController = {
 
       treeVerticalTabsBox.removeAttribute("hidden");
       treeVerticalTabsBox.setAttribute("shown", true);
-      Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "hidden");
-      Services.xulStore.persist(treeVerticalTabsBox, "shown");
 
       verticalTabs.setAttribute("hidden", true);
       verticalTabs.removeAttribute("visible");
@@ -689,8 +689,6 @@ var SidebarController = {
 
       treeVerticalTabsBox.setAttribute("hidden", true);
       treeVerticalTabsBox.removeAttribute("shown");
-      Services.xulStore.persist(treeVerticalTabsBox, "hidden");
-      Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "shown");
 
       verticalTabs.removeAttribute("hidden");
       if (Services.prefs.getBoolPref("sidebar.verticalTabs")) {
@@ -700,28 +698,14 @@ var SidebarController = {
       const event = new CustomEvent("TreeVerticalTabsHidden", { bubbles: true });
       treeVerticalTabsBox.dispatchEvent(event);
 
-      const browserWindows = Services.wm.getEnumerator('navigator:browser');
-      let shown = false;
-      while (browserWindows.hasMoreElements()) {
-        const win = browserWindows.getNext();
-        if (win.document.querySelector("#tree-vertical-tabs-box[shown='true']")) {
-          shown = true;
-          break;
-        }
-      }
       if (!shown && addon.isActive) {
         await addon.disable({ allowSystemAddons: true });
-        Services.prefs.setBoolPref("browser.sidebar.disabled", true);
       }
     }
   },
 
   get treeVerticalTabsBrowser() {
     return document.querySelector("#tree-vertical-tabs");
-  },
-
-  get treeVerticalTabsEnabled() {
-    return Services.xulStore.getValue(document.URL, "tree-vertical-tabs-box", "shown") == "true";
   },
 
   /**
@@ -2458,5 +2442,15 @@ XPCOMUtils.defineLazyPreferenceGetter(
     ) {
       SidebarController._state.updateVisibility();
     }
+  }
+);
+
+XPCOMUtils.defineLazyPreferenceGetter(
+  SidebarController,
+  "treeVerticalTabsEnabled",
+  "browser.sidebar.enabled",
+  false,
+  (_aPreference, _previousValue, newValue) => {
+    SidebarController.toggleTreeVerticalTabs(newValue);
   }
 );
