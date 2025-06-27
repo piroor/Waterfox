@@ -367,7 +367,7 @@ export class SidebarCustomize extends SidebarPage {
 
   #handleTreeVerticalTabsChange(e) {
     e.stopPropagation();
-    this.getWindow().SidebarController.toggleTreeVerticalTabs();
+    this.getWindow().SidebarController.toggleTreeVerticalTabs(e.target.checked);
   }
 
   #toggleExpandOnHover(e) {
