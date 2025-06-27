@@ -191,18 +191,6 @@
 
 /* Tree Vertical Tabs */
 
-/* toolbar button */
-#toggle-tree-vertical-tabs {
-  list-style-image: url("./tree-vertical-tabs-16x16.svg#toolbar-context");
-}
-#toggle-tree-vertical-tabs image {
-  -moz-context-properties: fill, fill-opacity;
-  color: inherit;
-  fill: currentColor;
-  min-height: 16px;
-  min-width: 16px;
-}
-
 /* tabs sidebar box */
 #tree-vertical-tabs-box {
   background-color: var(--sidebar-background-color);
