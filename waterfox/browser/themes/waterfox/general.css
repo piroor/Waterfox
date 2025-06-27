@@ -217,3 +217,7 @@
 #tree-vertical-tabs {
   flex: 1;
 }
+
+#category-tree > .category-icon {
+  list-style-image: url("./tree-vertical-tabs-24x24.svg#default-context");
+}

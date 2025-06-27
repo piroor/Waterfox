@@ -165,9 +165,6 @@ const BrowserWindowWatcher = {
     while (browserWindows.hasMoreElements()) {
       const win = browserWindows.getNext()/*.QueryInterface(Components.interfaces.nsIDOMWindow)*/
       yield win;
-      const sidebar = win.document?.querySelector('#sidebar');
-      if (sidebar)
-        yield sidebar.contentWindow;
     }
     return;
   },
