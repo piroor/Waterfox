@@ -607,8 +607,17 @@ var SidebarController = {
         Services.prefs.setBoolPref("browser.sidebar.disabled", false);
       }
       await addon.startupPromise;
-      Services.prefs.setBoolPref("sidebar.revamp", true);
-      Services.prefs.setBoolPref("sidebar.verticalTabs", true);
+      if (!Services.prefs.getBoolPref("sidebar.revamp")) {
+        await this.toggleRevampSidebar();
+      }
+      if (!Services.prefs.getBoolPref("sidebar.verticalTabs")) {
+        Services.prefs.setBoolPref("sidebar.verticalTabs", true);
+        // The sidebar-main maybe not initialized yet at the first time.
+        while (!this.sidebarMain.requestUpdate) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        this.toggleTabstrip();
+      }
 
       treeVerticalTabsBox.removeAttribute("hidden");
       treeVerticalTabsBox.setAttribute("shown", true);
