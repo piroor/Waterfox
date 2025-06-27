@@ -62,7 +62,7 @@ export default class TabHoverPreviewPanel {
     this._panelOpener = new TabPreviewPanelTimedFunction(
       () => {
         if (!this._isDisabled()) {
-          if (Services.xulStore.getValue(this._win?.document?.URL, 'tree-vertical-tabs-box', 'hidden') != 'true' &&
+          if (this._win.SidebarController.treeVerticalTabsEnabled &&
               typeof this.__ws__top == 'number') {
             const [x, y] = this.calculateCoordinatesForVertical();
             this._panel.openPopupAtScreen(x, y, false);
@@ -289,7 +289,7 @@ export default class TabHoverPreviewPanel {
 
   _movePanel() {
     if (this._tab) {
-      if (Services.xulStore.getValue(this._win.document.URL, 'tree-vertical-tabs-box', 'hidden') != 'true' &&
+      if (this._win.SidebarController.treeVerticalTabsEnabled &&
           typeof this.__ws__top == 'number') {
         const [x, y] = this.calculateCoordinatesForVertical();
         this._panel.moveTo(x, y);

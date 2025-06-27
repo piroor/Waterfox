@@ -580,9 +580,6 @@ var SidebarController = {
    * Toggle the vertical tabs preference.
    */
   toggleVerticalTabs() {
-    if (this.sidebarVerticalTabsEnabled) {
-      this.toggleTreeVerticalTabs(false);
-    }
     Services.prefs.setBoolPref(
       "sidebar.verticalTabs",
       !this.sidebarVerticalTabsEnabled
@@ -713,6 +710,10 @@ var SidebarController = {
         Services.prefs.setBoolPref("browser.sidebar.disabled", true);
       }
     }
+  },
+
+  get treeVerticalTabsEnabled() {
+    return Services.xulStore.getValue(document.URL, "tree-vertical-tabs-box", "shown") == "true";
   },
 
   /**
@@ -992,7 +993,7 @@ var SidebarController = {
       return;
     }
 
-    if (Services.xulStore.getValue(document.URL, 'tree-vertical-tabs-box', 'shown') == 'true') {
+    if (this.treeVerticalTabsEnabled) {
       this.toggleTreeVerticalTabs();
     }
 
@@ -2119,6 +2120,9 @@ var SidebarController = {
       arrowScrollbox.setAttribute("orient", "horizontal");
       tabStrip.removeAttribute("expanded");
       tabStrip.setAttribute("orient", "horizontal");
+      if (this.treeVerticalTabsEnabled) {
+        this.toggleTreeVerticalTabs(false);
+      }
     }
 
     let verticalToolbar = document.getElementById(
