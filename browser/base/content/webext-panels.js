@@ -31,7 +31,7 @@ function getBrowser(panel) {
       );
     }
     const heading =
-      panel.extension.manifest.sidebar_action?.default_title ??
+      panel.extension.manifest.sidebar_action.default_title ??
       panel.extension.name;
     document.getElementById("sidebar-panel-header").heading = heading;
   }

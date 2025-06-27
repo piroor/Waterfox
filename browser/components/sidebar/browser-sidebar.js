@@ -369,8 +369,7 @@ var SidebarController = {
       ) {
         // registerExtension() already creates menu items for extensions.
         const menuitem = this.createMenuItem(commandID, sidebar);
-        //menubar.appendChild(menuitem);
-        menubar.insertBefore(menuitem, menubar.querySelector('#viewmenu-tree-vertical-tabs-separator'));
+        menubar.appendChild(menuitem);
       }
     }
     if (this._mainResizeObserver) {
@@ -593,7 +592,6 @@ var SidebarController = {
     const treeVerticalTabsBox = document.querySelector("#tree-vertical-tabs-box");
     const verticalTabs = document.querySelector("#vertical-tabs");
     shouldShow ??= treeVerticalTabsBox.getAttribute("hidden") == "true";
-    const command = document.querySelector("#toggle-tree-vertical-tabs-command");
     const addon = await AddonManager.getAddonByID("sidebar@waterfox.net");
     if (shouldShow) {
       if (this.treeVerticalTabsBrowser) {
@@ -620,8 +618,6 @@ var SidebarController = {
       treeVerticalTabsBox.setAttribute("shown", true);
       Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "hidden");
       Services.xulStore.persist(treeVerticalTabsBox, "shown");
-
-      command.setAttribute("checked", true);
 
       verticalTabs.setAttribute("hidden", true);
       verticalTabs.removeAttribute("visible");
@@ -695,8 +691,6 @@ var SidebarController = {
       treeVerticalTabsBox.removeAttribute("shown");
       Services.xulStore.persist(treeVerticalTabsBox, "hidden");
       Services.xulStore.removeValue(document.URL, treeVerticalTabsBox.id, "shown");
-
-      command.removeAttribute("checked");
 
       verticalTabs.removeAttribute("hidden");
       if (Services.prefs.getBoolPref("sidebar.verticalTabs")) {
@@ -1658,8 +1652,7 @@ var SidebarController = {
 
     // Insert a menuitem for View->Show Sidebars.
     const menuitem = this.createMenuItem(commandID, sidebar);
-    //document.getElementById("viewSidebarMenu").appendChild(menuitem);
-    document.getElementById("viewSidebarMenu").insertBefore(menuitem, document.querySelector('#viewmenu-tree-vertical-tabs-separator'));
+    document.getElementById("viewSidebarMenu").appendChild(menuitem);
     this.addOrUpdateExtension(commandID, sidebar);
 
     if (!this.sidebarRevampEnabled) {

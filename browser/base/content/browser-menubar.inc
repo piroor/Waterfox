@@ -129,14 +129,7 @@
                   </menupopup>
                 </menu>
                 <menu id="viewSidebarMenuMenu" data-l10n-id="menu-view-sidebar">
-                  <menupopup id="viewSidebarMenu">
-                    <menuseparator id="viewmenu-tree-vertical-tabs-separator"/>
-                    <menuitem id="viewmenu-toggle-tree-vertical-tabs"
-                              type="checkbox"
-                              command="toggle-tree-vertical-tabs-command"
-                              key="toggle-tree-vertical-tabs-key"
-                              data-l10n-id="menu-view-sidebar-toggle-tree-vertical-tabs"/>
-                  </menupopup>
+                  <menupopup id="viewSidebarMenu"/>
                 </menu>
                 <menuseparator/>
                 <menu id="viewFullZoomMenu" data-l10n-id="menu-view-full-zoom">

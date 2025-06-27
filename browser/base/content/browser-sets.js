@@ -247,9 +247,6 @@ document.addEventListener(
           case "zoomWindow":
             zoomWindow();
             break;
-          case "toggle-tree-vertical-tabs-command":
-            SidebarController.toggleTreeVerticalTabs();
-            break;
         }
       });
 
@@ -295,9 +292,6 @@ document.addEventListener(
           break;
         case "key_gotoHistory":
           SidebarController.toggle("viewHistorySidebar");
-          break;
-        case "toggle-tree-vertical-tabs-key":
-          SidebarController.toggleTreeVerticalTabs();
           break;
 
         case "key_selectTab1":
