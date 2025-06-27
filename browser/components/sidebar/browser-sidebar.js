@@ -596,7 +596,7 @@ var SidebarController = {
     const command = document.querySelector("#toggle-tree-vertical-tabs-command");
     const addon = await AddonManager.getAddonByID("sidebar@waterfox.net");
     if (shouldShow) {
-      if (document.querySelector("#tree-vertical-tabs")) {
+      if (this.treeVerticalTabsBrowser) {
         return;
       }
       if (!addon.isActive) {
@@ -678,7 +678,7 @@ var SidebarController = {
       treeVerticalTabsBox.dispatchEvent(event);
     }
     else {
-      const treeVerticalTabs = document.querySelector("#tree-vertical-tabs");
+      const treeVerticalTabs = this.treeVerticalTabsBrowser;
       if (!treeVerticalTabs) {
         return;
       }
@@ -717,6 +717,10 @@ var SidebarController = {
         Services.prefs.setBoolPref("browser.sidebar.disabled", true);
       }
     }
+  },
+
+  get treeVerticalTabsBrowser() {
+    return document.querySelector("#tree-vertical-tabs");
   },
 
   get treeVerticalTabsEnabled() {
@@ -904,9 +908,7 @@ var SidebarController = {
       content.updatePosition();
     }
 
-    if (this.treeVerticalTabsEnabled) {
-      document.querySelector("#tree-vertical-tabs").reload();
-    }
+    this.treeVerticalTabsBrowser?.reload();
   },
 
   /**
