@@ -20,5 +20,4 @@ JS_PREFERENCE_PP_FILES += [
     "app/profile/02-speed.js",
     "app/profile/03-privacy.js",
     "app/profile/04-features.js",
-    "app/profile/05-tree-vertical-tabs.js",
 ]
