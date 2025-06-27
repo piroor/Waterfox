@@ -643,7 +643,6 @@ var SidebarController = {
       treeVerticalTabs.setAttribute("remoteType", "extension");
       treeVerticalTabs.setAttribute("maychangeremoteness", "true");
       treeVerticalTabs.setAttribute("remoteType", "extension");
-      treeVerticalTabs.setAttribute("transparent", "true");
       treeVerticalTabs.setAttribute("initialBrowsingContextGroupId", policy.browsingContextGroupId);
 
       const { ExtensionUtils } = ChromeUtils.importESModule(
@@ -651,6 +650,14 @@ var SidebarController = {
       );
       const { promiseEvent } = ExtensionUtils;
       promiseEvent(treeVerticalTabs, "XULFrameLoaderCreated").then(() => {
+        const { ExtensionParent } = ChromeUtils.importESModule(
+          "resource://gre/modules/ExtensionParent.sys.mjs"
+        );
+        ExtensionParent.apiManager.emit(
+          "extension-browser-inserted",
+          treeVerticalTabs,
+          null
+        );
         treeVerticalTabs.messageManager.loadFrameScript(
           "chrome://extensions/content/ext-browser-content.js",
           false,
@@ -895,6 +902,10 @@ var SidebarController = {
     let content = SidebarController.browser.contentWindow;
     if (content && content.updatePosition) {
       content.updatePosition();
+    }
+
+    if (this.treeVerticalTabsEnabled) {
+      document.querySelector("#tree-vertical-tabs").reload();
     }
   },
 
