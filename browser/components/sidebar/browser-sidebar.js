@@ -602,8 +602,9 @@ var SidebarController = {
       if (document.querySelector("#tree-vertical-tabs")) {
         return;
       }
-      if (addon.userDisabled) {
-        addon.enable({ allowSystemAddons: true });
+      if (!addon.isActive) {
+        await addon.enable({ allowSystemAddons: true });
+        Services.prefs.setBoolPref("browser.sidebar.disabled", false);
       }
       await addon.startupPromise;
       Services.prefs.setBoolPref("sidebar.revamp", true);
@@ -698,8 +699,9 @@ var SidebarController = {
           break;
         }
       }
-      if (!shown) {
-        addon.disable({ allowSystemAddons: true });
+      if (!shown && addon.isActive) {
+        await addon.disable({ allowSystemAddons: true });
+        Services.prefs.setBoolPref("browser.sidebar.disabled", true);
       }
     }
   },
