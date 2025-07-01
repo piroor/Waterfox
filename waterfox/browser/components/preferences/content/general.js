@@ -56,6 +56,9 @@ const _gMainPaneOverlay = {
 
       // DoOH
       { id: "network.trr.use_ohttp", type: "bool" },
+
+      // Tree vertical tabs
+      { id: "browser.sidebar.enabled", type: "bool" },
     ];
   },
 
@@ -70,6 +73,11 @@ const _gMainPaneOverlay = {
       this.setDynamicThemeGroupValue();
       this.setEventListener("dynamicThemeGroup", "command", (event) => {
         this.updateDynamicThemePref(event.target.value);
+      });
+      this.setEventListener("browserLayoutRadioGroup", "change", (event) => {
+        const isVertical = !!document.querySelector("#browserLayoutVerticalTabs[selected='true']");
+        const treeVerticalTabsCheck = document.querySelector("#browserLayout_treeVerticalTabsEnabled");
+        treeVerticalTabsCheck.disabled = !isVertical;
       });
       if (document.readyState === "complete") {
         this.tocGenerate();
