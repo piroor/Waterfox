@@ -368,15 +368,9 @@ const BrowserWindowWatcher = {
         addon.disable();
       }; return;
 
-      case 2: {
-        Services.prompt.alert(
-          Services.wm.getMostRecentBrowserWindow(),
-          this.locale.get('howToActivateAgain_title'),
-          this.locale.get('howToActivateAgain_message')
-        );
-        const addon = await lazy.AddonManager.getAddonByID(this.EXTENSION_ID);
-        addon.disable();
-      }; return;
+      case 2:
+        Services.prefs.setBoolPref('browser.sidebar.enabled', false);
+        return;
 
       default:
         return;
