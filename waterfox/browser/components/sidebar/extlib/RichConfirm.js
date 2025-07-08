@@ -625,7 +625,7 @@
       }
     }
 
-    async show({ onShown } = {}) {
+    async show({ onShown, onDialogOpened } = {}) {
       this.buildUI();
       await new Promise((resolve, _reject) => setTimeout(resolve, 0));
 
@@ -719,6 +719,19 @@
           catch(error) {
             console.error(error);
           }
+        }
+      }
+
+      if (typeof onDialogOpened == 'function') {
+        try {
+          await onDialogOpened({
+            close: () => {
+              this.hide();
+            },
+          });
+        }
+        catch(error) {
+          console.error(error);
         }
       }
 
@@ -1109,7 +1122,7 @@
                 dialogWidth:  rect.width + dialog.scrollLeftMax + inlineEndPadding,
                 dialogHeight: rect.height + dialog.scrollTopMax + bottomPadding
               });
-            }
+            },
           });
           browser.runtime.sendMessage({
             type:      'rich-confirm-dialog-complete',
@@ -1156,15 +1169,15 @@
       }
     }
 
-    static async showInPopup(winId, params) {
+    static async showInPopup(ownerWinId, params) {
       let ownerWin;
       if (!params) {
-        params = winId;
+        params = ownerWinId;
         ownerWin = await browser.windows.getLastFocused({});
       }
       else {
         try {
-          ownerWin = await browser.windows.get(winId).catch(_error => null);
+          ownerWin = await browser.windows.get(ownerWinId).catch(_error => null);
         }
         catch(_error) {
         }
@@ -1364,12 +1377,27 @@
       }
       const activeTab = win.tabs.find(tab => tab.active);
 
-      const onFocusChanged = !params.modal ? null : windowId => {
-        if (windowId == ownerWin.id)
-          browser.windows.update(win.id, { focused: true });
+      const onFocusChanged = async windowId => {
+        if (!params.modal ||
+            windowId != ownerWin.id) {
+          return;
+        }
+        console.log(`focus of the window ${ownerWin.id} which is the owner of a modal dialog ${win.id} is changed`);
+        const [updatedWin, updatedOwnerWin] = await Promise.all([
+          browser.windows.get(win.id),
+          browser.windows.get(ownerWin.id),
+        ]);
+        if (updatedOwnerWin?.state == 'minimized') {
+          console.log(' => but the owner window is minimized');
+          if (updatedWin.state != 'minimized') {
+            console.log(' => minimize the modal dialog also');
+            browser.windows.update(win.id, { state: 'minimized' });
+          }
+          return;
+        }
+        browser.windows.update(win.id, { focused: true });
       };
-      if (onFocusChanged)
-        browser.windows.onFocusChanged.addListener(onFocusChanged);
+      browser.windows.onFocusChanged.addListener(onFocusChanged);
 
       // On Thunderbird, closing of a composition window won't notify "windows.onRemoved" events, so we need to listen "tabs.onRemoved" also.
       let onWindowClosed, onTabClosed;
@@ -1410,6 +1438,7 @@
         promisedDismissed,
         (async () => {
           try {
+            let onDialogOpenedCalled = false;
             const frameSize = await new Promise((resolve, _reject) => {
               let timeout;
               const getFrameSize = function getFrameSize(title, uniqueKey) {
@@ -1456,6 +1485,16 @@
                     browser.tabs.onUpdated.removeListener(onTabUpdated);
                     resolve(result);
                   });
+
+                if (typeof params.onDialogOpened == 'function' &&
+                    !onDialogOpenedCalled) {
+                  onDialogOpenedCalled = true;
+                  params.onDialogOpened({
+                    close() {
+                      browser.windows.remove(win.id);
+                    },
+                  });
+                }
               };
               timeout = setTimeout(() => {
                 if (!browser.tabs.onUpdated.hasListener(onTabUpdated))
@@ -1487,6 +1526,16 @@
                     browser.tabs.onUpdated.removeListener(onTabUpdated);
                     resolve(result);
                   }).catch(console.error);
+
+                if (typeof params.onDialogOpened == 'function' &&
+                    !onDialogOpenedCalled) {
+                  onDialogOpenedCalled = true;
+                  params.onDialogOpened({
+                    close() {
+                      browser.windows.remove(win.id);
+                    },
+                  });
+                }
               }, 500);
               browser.tabs.onUpdated.addListener(onTabUpdated, {
                 properties: ['status'],
@@ -1536,8 +1585,7 @@
         })()
       ]);
 
-      if (onFocusChanged)
-        browser.windows.onFocusChanged.removeListener(onFocusChanged);
+      browser.windows.onFocusChanged.removeListener(onFocusChanged);
       browser.windows.onRemoved.removeListener(onWindowClosed);
       browser.tabs.onRemoved.removeListener(onTabClosed);
 
