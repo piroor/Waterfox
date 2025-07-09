@@ -956,7 +956,7 @@
   "tabContextMenu_bookmarkSelected_label":       { "message": "選択したタブをブックマーク...(&T)" },
   "tabContextMenu_bookmarkSelected_label_multiselected": { "message": "選択したタブをブックマーク...(&T)" },
 
-  "tabContextMenu_close_label_multiselected":       { "message": "選択したタブを閉じる(&S)" },
+  "tabContextMenu_close_label_multiselected":       { "message": "%S 個のタブを閉じる(&C)" },
 
   "tabGroupMenu_tab-group-editor-title-create":                 { "message": "タブグループを作成" },
   "tabGroupMenu_tab-group-editor-title-edit":                   { "message": "タブグループの管理" },

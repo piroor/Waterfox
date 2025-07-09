@@ -986,6 +986,9 @@ function onClick(_event) {
 onClick = EventUtils.wrapWithErrorHandler(onClick);
 
 function onAuxClick(event) {
+  if (event.button != 1) {
+    return;
+  }
   // This is required to prevent new tab from middle-click on a UI link.
   event.stopPropagation();
   event.preventDefault();

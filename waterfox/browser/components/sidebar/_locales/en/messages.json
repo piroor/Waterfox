@@ -962,7 +962,7 @@
   "tabContextMenu_bookmarkSelected_label":               { "message": "Bookmark Selected &Tab…" },
   "tabContextMenu_bookmarkSelected_label_multiselected": { "message": "Bookmark Selected &Tabs…" },
 
-  "tabContextMenu_close_label_multiselected":       { "message": "Close &Selected Tabs" },
+  "tabContextMenu_close_label_multiselected":       { "message": "&Close %S Tabs" },
 
   "tabGroupMenu_tab-group-editor-title-create":                 { "message": "Create tab group" },
   "tabGroupMenu_tab-group-editor-title-edit":                   { "message": "Manage tab group" },
