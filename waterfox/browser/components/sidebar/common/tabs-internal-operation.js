@@ -201,12 +201,14 @@ export async function removeTabs(tabs, { keepDescendants, byMouseOperation, orig
 
 export function setTabActive(tab) {
   const oldActiveTabs = clearOldActiveStateInWindow(tab.windowId, tab);
-  tab.$TST.addState(Constants.kTAB_STATE_ACTIVE);
   tab.active = true;
+  tab.$TST.addState(Constants.kTAB_STATE_ACTIVE);
   tab.$TST.removeState(Constants.kTAB_STATE_NOT_ACTIVATED_SINCE_LOAD);
   tab.$TST.removeState(Constants.kTAB_STATE_UNREAD, { permanently: true });
   tab.$TST.removeState(Constants.kTAB_STATE_PENDING, { broadcast: Constants.IS_BACKGROUND });
   TabsStore.activeTabsInWindow.get(tab.windowId).add(tab);
+  TabsStore.activeTabInWindow.set(tab.windowId, tab);
+  Tab.onActivated.dispatch(tab);
   return oldActiveTabs;
 }
 
@@ -218,6 +220,7 @@ export function clearOldActiveStateInWindow(windowId, exception) {
     oldTab.$TST.removeState(Constants.kTAB_STATE_ACTIVE);
     oldTab.active = false;
     oldTabs.delete(oldTab);
+    Tab.onUnactivated.dispatch(oldTab);
   }
   return Array.from(oldTabs);
 }

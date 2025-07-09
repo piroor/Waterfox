@@ -1232,6 +1232,25 @@ tab-item[data-group-id]:not([data-group-id="-1"]) {
   }
 }
 
+tab-item[type="group-collapsed-members-counter"] {
+  tab-twisty,
+  tab-favicon,
+  tab-closebox,
+  .highlighter,
+  .contextual-identity-marker {
+    display: none;
+  }
+
+  &,
+  &:hover,
+  tab-item-substance,
+  tab-item-substance:hover {
+    --tab-surface: transparent !important;
+    --tab-border: transparent !important;
+    --tab-text: light-dark(var(--tab-group-color), var(--tab-group-color-pale)) !important;
+  }
+}
+
 
 /* non-tab items */
 

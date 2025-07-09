@@ -607,9 +607,8 @@ export default class TabGroupMenuPanel extends InContentPanel {
         color:   event.target.value,
       });
     });
-    const panel = this.panel.querySelector('.in-content-panel');
-    panel.addEventListener('click', this.onClickSelf);
-    panel.addEventListener('keydown', this.onKeyDownSelf);
+    this.panel.addEventListener('click', this.onClickSelf);
+    this.panel.addEventListener('keydown', this.onKeyDownSelf);
   }
 
   onUpdateUI({ targetId, groupTitle, groupColor, creating, anchorTabRect, logging, complete, ...params }) {

@@ -245,9 +245,15 @@ export function getRenderableTreeItems(windowId = null) {
       [...TabsStore.windows.get(windowId).tabGroups.values()],
       group => {
         group.$TST.reindex();
+        if (group.collapsed &&
+            group.$TST.members.some(tab => tab.active)) {
+          const counterItem = group.$TST.collapsedMembersCounterItem;
+          counterItem.$TST.update();
+          return [group, counterItem];
+        }
         return group;
       }
-    )
+    ).flat(),
   ]);
   log('getRenderableTreeItems: mixedItems = ', mixedItems);
 
@@ -465,6 +471,9 @@ function getRenderableItemById(id) {
   switch (type) {
     case TreeItem.TYPE_GROUP:
       return TabGroup.get(parseInt(rawId));
+
+    case TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER:
+      return TabGroup.get(parseInt(rawId)).$TST.collapsedMembersCounterItem;
 
     case TreeItem.TYPE_TAB:
     default:
@@ -871,14 +880,27 @@ export function scrollToNewTab(item, options = {}) {
 
 function canScrollToItem(item) {
   item = Tab.get(item?.id);
-  return (TabsStore.ensureLivingItem(item) &&
-          !item.hidden);
+  if (!TabsStore.ensureLivingItem(item) ||
+      item.hidden) {
+    return false;
+  }
+
+  // We should not produce any scrolling, when there is only one row.
+  // Otherwise such a scrolling will produce stressfull "shaking" of tabs.
+  // https://github.com/piroor/treestyletab/issues/3768
+  if (item.pinned) {
+    const rows = parseInt(document.documentElement.style.getPropertyValue('--pinned-tabs-rows') || '0');
+    return rows > 1;
+  }
+  else {
+    return Tab.getUnpinnedTabs(TabsStore.getCurrentWindowId()).length > 1;
+  }
 }
 
 export async function scrollToItem(item, options = {}) {
   scrollToItem.lastTargetId = null;
 
-  log('scrollToItem to ', item?.id, options.anchor?.id, options,
+  log('scrollToItem to ', item?.id, ' anchor = ', options.anchor?.id, options,
       { stack: configs.debug && new Error().stack });
   cancelRunningScroll();
   if (!canScrollToItem(item)) {

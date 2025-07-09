@@ -26,7 +26,7 @@ import * as Permissions from '/common/permissions.js';
 import * as TabsStore from '/common/tabs-store.js';
 import * as TSTAPI from '/common/tst-api.js';
 
-import { Tab, TabGroup } from '/common/TreeItem.js';
+import { Tab, TabGroup, TreeItem } from '/common/TreeItem.js';
 
 import EventListenerManager from '/extlib/EventListenerManager.js';
 
@@ -741,7 +741,7 @@ async function onContextMenu(event) {
     return;
   }
 
-  const originalTargetNativeTabGroupElement = originalTarget?.closest('[data-native-tab-group-id]');
+  const originalTargetNativeTabGroupElement = originalTarget?.closest(`[type="${TreeItem.TYPE_GROUP}"][data-native-tab-group-id]`);
   const nativeTabGroup = originalTargetNativeTabGroupElement?.$TST.group;
   if (nativeTabGroup &&
       !modifierKeyPressed) {

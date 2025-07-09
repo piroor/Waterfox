@@ -11,7 +11,7 @@ import {
 import * as Constants from '/common/constants.js';
 import * as Permissions from '/common/permissions.js';
 import * as TabsStore from '/common/tabs-store.js';
-import { Tab } from '/common/TreeItem.js';
+import { Tab, TreeItem } from '/common/TreeItem.js';
 
 import TabFavIconHelper from '/extlib/TabFavIconHelper.js';
 
@@ -193,13 +193,19 @@ export class TreeItemElement extends HTMLElement {
     }
   }
 
+  get type() {
+    return this.getAttribute('type');
+  }
+
   // Elements restored from cache are initialized without bundled tabs.
   // Thus we provide abiltiy to get tab and service objects from cached/restored information.
   get raw() {
     return this._raw || (
-      this._raw = (this.getAttribute('type') == 'group' ?
-        TabsStore.windows.get(parseInt(this.getAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID))) :
-        Tab.get(parseInt(this.getAttribute(Constants.kAPI_TAB_ID)))
+      this._raw = (this.type == TreeItem.TYPE_GROUP ?
+        TabsStore.tabGroups.get(parseInt(this.getAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID))) :
+        this.type == TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER ?
+          TabsStore.tabGroups.get(parseInt(this.getAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID))).$TST.collapsedMembersCounterItem :
+          Tab.get(parseInt(this.getAttribute(Constants.kAPI_TAB_ID)))
       )
     );
   }
@@ -260,11 +266,22 @@ export class TreeItemElement extends HTMLElement {
     this._labelElement.setAttribute(Constants.kAPI_TAB_ID, this.getAttribute(Constants.kAPI_TAB_ID));
     this._labelElement.setAttribute(Constants.kAPI_WINDOW_ID, this.getAttribute(Constants.kAPI_WINDOW_ID));
 
-    if (this.getAttribute('type') == 'tab' &&
-        this.tab)
-      this.dataset.index =
-        this.substanceElement.dataset.index =
-          this._labelElement.dataset.index =this.tab.index;
+
+    switch (this.getAttribute('type')) {
+      case TreeItem.TYPE_TAB:
+        if (this.tab) {
+          this.dataset.index =
+            this.substanceElement.dataset.index =
+              this._labelElement.dataset.index = this.tab.index;
+        }
+      case TreeItem.TYPE_GROUP:
+        this.substanceElement.setAttribute('draggable', true);
+        break;
+
+      default:
+        this.substanceElement.removeAttribute('draggable');
+        break;
+    }
 
     this._labelElement.applyAttributes();
   }
@@ -680,7 +697,7 @@ index = ${raw.index}
     const raw       = this.$TST.raw;
     const classList = this.classList;
 
-    this.label = raw.title;
+    this.label = raw.$TST.title;
 
     const tab = this.$TST.tab;
     if (tab) {

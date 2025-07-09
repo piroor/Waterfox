@@ -12,7 +12,7 @@ import {
 import * as Constants from '/common/constants.js';
 import * as Permissions from '/common/permissions.js';
 import * as TabsStore from '/common/tabs-store.js';
-import { Tab } from '/common/TreeItem.js';
+import { Tab, TreeItem } from '/common/TreeItem.js';
 
 import InContentPanelController from '/resources/module/InContentPanelController.js';
 import TabPreviewPanel from '/resources/module/TabPreviewPanel.js'; // the IMPL
@@ -102,6 +102,7 @@ async function onTabSubstanceEnter(event) {
   }
 
   if (!event.target.tab ||
+      event.target.tab.type != TreeItem.TYPE_TAB ||
       document.documentElement.classList.contains(Constants.kTABBAR_STATE_TAB_DRAGGING)) {
     return;
   }

@@ -77,10 +77,12 @@ export function getItemFromDOMNode(node, options = {}) {
     node = node.parentNode;
   const itemSubstance = node?.closest(kTREE_ITEM_SUBSTANCE_ELEMENT_NAME);
   const item = itemSubstance?.closest(kTREE_ITEM_ELEMENT_NAME);
-  if (options.force) {
-    return item?.apiRaw;
+  const raw = item?.apiRaw;
+  if (options.force ||
+      raw?.type == TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER) {
+    return raw;
   }
-  return TabsStore.ensureLivingItem(item?.apiRaw);
+  return TabsStore.ensureLivingItem(raw);
 }
 
 
@@ -242,15 +244,23 @@ export function renderItem(item, { containerElement, insertBefore } = {}) {
     item.$TST.setAttribute('id', getItemElementId(item));
     item.$TST.setAttribute('type', item.$TST.type);
     item.$TST.setAttribute(Constants.kAPI_WINDOW_ID, item.windowId || -1);
-    if (item.type == TreeItem.TYPE_GROUP) {
-      item.$TST.setAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID, item.id || -1);
-      item.$TST.removeAttribute(Constants.kGROUP_ID);
-    }
-    else {
-      item.$TST.setAttribute(Constants.kAPI_TAB_ID, item.id || -1);
-      item.$TST.setAttribute(Constants.kGROUP_ID, item.groupId);
-      item.$TST.addState(Constants.kTAB_STATE_THROBBER_UNSYNCHRONIZED);
-      TabsStore.addUnsynchronizedTab(item);
+    switch (item.type) {
+      case TreeItem.TYPE_GROUP:
+        item.$TST.setAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID, item.id || -1);
+        item.$TST.removeAttribute(Constants.kGROUP_ID);
+        break;
+
+      case TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER:
+        item.$TST.setAttribute(Constants.kAPI_NATIVE_TAB_GROUP_ID, item.id || -1);
+        item.$TST.setAttribute(Constants.kGROUP_ID, item.id);
+        break;
+
+      default:
+        item.$TST.setAttribute(Constants.kAPI_TAB_ID, item.id || -1);
+        item.$TST.setAttribute(Constants.kGROUP_ID, item.groupId);
+        item.$TST.addState(Constants.kTAB_STATE_THROBBER_UNSYNCHRONIZED);
+        TabsStore.addUnsynchronizedTab(item);
+        break;
     }
     if (reuseFromPool) {
       itemElement.favIconUrl = null;
@@ -648,9 +658,22 @@ async function activateRealActiveTab(windowId) {
   const tab = Tab.get(id);
   if (!tab)
     throw new Error(`FATAL ERROR: Active tab ${id} in the window ${windowId} is not tracked`);
-  TabsStore.activeTabInWindow.set(windowId, tab);
   TabsInternalOperation.setTabActive(tab);
 }
+
+Tab.onActivated.addListener(tab => {
+  getItemContainerElement(tab)?.setAttribute('aria-activedescendant', getItemElementId(tab));
+  if (tab.groupId != -1) {
+    reserveToRefreshNativeTabGroup(tab.groupId);
+  }
+});
+
+Tab.onUnactivated.addListener(tab => {
+  getItemContainerElement(tab)?.removeAttribute('aria-activedescendant');
+  if (tab.groupId != -1) {
+    reserveToRefreshNativeTabGroup(tab.groupId);
+  }
+});
 
 const mReindexedTabIds = new Set();
 
@@ -686,7 +709,7 @@ function reserveToRefreshNativeTabGroup(id) {
     group.$TST.updateElement(TabUpdateTarget.TabProperties);
     for (const tab of group.$TST.members) {
       CollapseExpand.setCollapsed(tab, {
-        collapsed: group.collapsed || !!tab.$TST.topmostSubtreeCollapsedAncestor,
+        collapsed: tab.$TST.collapsedByParent,
       });
       tab.$TST.updateElement(TabUpdateTarget.TabProperties);
     }
@@ -695,17 +718,10 @@ function reserveToRefreshNativeTabGroup(id) {
 reserveToRefreshNativeTabGroup.invoked = new Set();
 
 Tab.onNativeGroupModified.addListener(async tab => {
-  const subtreeCollapsedAncestor = tab.$TST.topmostSubtreeCollapsedAncestor;
-  const collapsed = (
-    !!subtreeCollapsedAncestor ||
-    (tab.groupId == -1 ?
-      !!subtreeCollapsedAncestor :
-      (tab.$TST.nativeTabGroup ||
-       await browser.tabGroups.get(tab.groupId)/* failsafe: the group can be not tracked yet! */).collapsed)
-  );
   CollapseExpand.setCollapsed(tab, {
-    collapsed,
+    collapsed: await tab.$TST.promisedCollapsedByParent,
   });
+  tab.$TST.updateElement(TabUpdateTarget.TabProperties);
 });
 
 
@@ -880,7 +896,6 @@ BackgroundConnection.onMessage.addListener(async message => {
           break;
         await Tab.waitUntilTracked(lastMessage.tabId);
         const activeTab = Tab.get(lastMessage.tabId);
-        TabsStore.activeTabInWindow.set(activeTab.windowId, activeTab);
         TabsInternalOperation.setTabActive(activeTab);
       }
     }; break;
@@ -903,12 +918,7 @@ BackgroundConnection.onMessage.addListener(async message => {
       const tab = Tab.get(lastMessage.tabId);
       if (!tab)
         return;
-      const lastActive = TabsStore.activeTabInWindow.get(lastMessage.windowId);
-      if (lastActive)
-        getItemContainerElement(lastActive).removeAttribute('aria-activedescendant');
-      TabsStore.activeTabInWindow.set(lastMessage.windowId, tab);
       TabsInternalOperation.setTabActive(tab);
-      getItemContainerElement(tab).setAttribute('aria-activedescendant', getItemElementId(tab));
     }; break;
 
     case Constants.kCOMMAND_NOTIFY_TAB_UPDATED: {

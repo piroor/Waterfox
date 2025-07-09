@@ -157,7 +157,7 @@ function getDragDataFromOneItem(item, options = {}) {
       item:     null,
       items:    [],
       structure:      [],
-      nextGroupColor: TabGroup.getUextUnusedColor(),
+      nextGroupColor: TabGroup.getNextUnusedColor(),
       windowId:       null,
       instanceId:     mInstanceId,
       sessionId,
@@ -171,7 +171,7 @@ function getDragDataFromOneItem(item, options = {}) {
     tab,
     tabs,
     structure:      TreeBehavior.getTreeStructureFromTabs(tabs),
-    nextGroupColor: TabGroup.getUextUnusedColor(),
+    nextGroupColor: TabGroup.getNextUnusedColor(),
     windowId:       item.windowId,
     instanceId:     mInstanceId,
     sessionId,
@@ -257,14 +257,13 @@ function getDropAction(event) {
   info.defineGetter('draggedItemIds', () => {
     return info.draggedItems.map(item => item.id);
   });
-  info.defineGetter('firstTargetItem', () => {
-    //return Tab.getFirstNormalTab(TabsStore.getCurrentWindowId()) || Tab.getFirstTab(TabsStore.getCurrentWindowId());
-    return Scroll.getRenderableTreeItems()[0];
-  });
-  info.defineGetter('lastTargetItem', () => {
-    //return Tab.getLastTab(TabsStore.getCurrentWindowId());
+  info.defineGetter('firstTargetableItem', () => {
     const items = Scroll.getRenderableTreeItems();
-    return items[items.length - 1];
+    return items.length > 0 ? items[0] : Tab.getFirstTab(TabsStore.getCurrentWindowId());
+  });
+  info.defineGetter('lastTargetableItem', () => {
+    const items = Scroll.getRenderableTreeItems();
+    return items.length > 0 ? items[items.length - 1] : Tab.getLastTab(TabsStore.getCurrentWindowId());
   });
   info.defineGetter('sanitizedDropOnTargetItem', () => { // the drop target we are trying to drop on itself
     return info.dropPosition == kDROP_ON_SELF ?
@@ -400,9 +399,9 @@ function getDropAction(event) {
   if (!targetItem) {
     //log('dragging on non-tab element');
     const action = Constants.kACTION_MOVE | Constants.kACTION_DETACH;
-    if (event.clientY < Scroll.getItemRect(info.firstTargetItem).top) {
+    if (event.clientY < Scroll.getItemRect(info.firstTargetableItem).top) {
       //log('dragging above the first tab');
-      info.targetItem   = info.insertBefore = info.firstTargetItem;
+      info.targetItem   = info.insertBefore = info.firstTargetableItem;
       info.dropPosition = kDROP_BEFORE;
       info.action       = action;
       if (info.draggedItem &&
@@ -412,9 +411,9 @@ function getDropAction(event) {
         info.dropPosition = kDROP_IMPOSSIBLE;
       }
     }
-    else if (event.clientY > Scroll.getItemRect(info.lastTargetItem).bottom) {
+    else if (event.clientY > Scroll.getItemRect(info.lastTargetableItem).bottom) {
       //log('dragging below the last tab');
-      info.targetItem   = info.insertAfter = info.lastTargetItem;
+      info.targetItem   = info.insertAfter = info.lastTargetableItem;
       info.dropPosition = kDROP_AFTER;
       info.action       = action;
       if (info.draggedItem?.pinned &&
@@ -464,12 +463,12 @@ function getDropAction(event) {
   const shouldInvertArea = onFaviconizedTab && isRTL();
   if (eventCoordinate < targetItemCoordinate + beforeOrAfterDropAreaSize) {
     info.dropPosition = shouldInvertArea ? kDROP_AFTER : kDROP_BEFORE;
-    info.insertBefore = info.firstTargetItem;
+    info.insertBefore = info.firstTargetableItem;
   }
   else if (dropAreasCount == 2 ||
            eventCoordinate > targetItemCoordinate + targetItemSize - beforeOrAfterDropAreaSize) {
     info.dropPosition = shouldInvertArea ? kDROP_BEFORE : kDROP_AFTER;
-    info.insertAfter  = info.lastTargetItem;
+    info.insertAfter  = info.lastTargetableItem;
   }
   else {
     info.dropPosition = kDROP_ON_SELF;

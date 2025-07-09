@@ -80,6 +80,7 @@ export function reposition(options = {}) {
   if (pinnedTabs.length == 0) {
     reset();
     document.documentElement.classList.remove('have-pinned-tabs');
+    document.documentElement.style.setProperty('--pinned-tabs-rows', 0);
     return;
   }
 
@@ -168,6 +169,7 @@ export function reposition(options = {}) {
   }
   log('reposition: ', { maxWidth, faviconized, width, height, maxCol, maxRow, pinnedTabsAreaRatio, allTabsAreaHeight, xOffset, yOffset, mMaxVisibleRows, mAreaHeight });
   log('overflow: mContentsHeight > mAreaHeight : ', mContentsHeight > mAreaHeight);
+  document.documentElement.style.setProperty('--pinned-tabs-rows', row + 1);
   SidebarItems.pinnedContainer.classList.toggle('overflow', mContentsHeight > mAreaHeight);
 }
 

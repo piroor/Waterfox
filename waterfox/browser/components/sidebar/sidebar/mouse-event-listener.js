@@ -491,13 +491,19 @@ async function onMouseUp(event) {
   if (lastMousedown.tab && lastMousedown.detail.targetType == 'tab')
     promisedCanceled = lastMousedown.promisedMousedownNotified;
 
-  const lastMousedownTab = lastMousedown.detail.tabType == 'group' ?
+  const lastMousedownTab = lastMousedown.detail.tabType == TreeItem.TYPE_GROUP ?
     TabGroup.get(lastMousedown.detail.tabId) :
-    Tab.get(lastMousedown.detail.tabId);
+    lastMousedown.detail.tabType == TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER ?
+      TabGroup.get(lastMousedown.detail.tabId).$TST.collapsedMembersCounterItem :
+      Tab.get(lastMousedown.detail.tabId);
   if (lastMousedown.expired ||
       lastMousedown.detail.targetType != EventUtils.getEventTargetType(event) || // when the cursor was moved before mouseup
       (tab && tab != lastMousedownTab)) { // when the tab was already removed
-    log(' => expired, different type, or different tab');
+    log(' => expired, different type, or different tab ', {
+      expired: lastMousedown.expired,
+      targetType: lastMousedown.detail.targetType,
+      targetTypeFromEvent: EventUtils.getEventTargetType(event),
+    });
     return;
   }
 
@@ -704,7 +710,8 @@ async function handleDefaultMouseUpOnTab({ lastMousedown, tab, event } = {}) {
       onRegularArea &&
       !wasMultiselectionAction) {
     switch (tab.$TST.type) {
-      case 'tab':
+      case TreeItem.TYPE_TAB:
+        log(' => activate');
         BackgroundConnection.sendMessage({
           type:  Constants.kCOMMAND_ACTIVATE_TAB,
           tabId: tab.id,
@@ -713,15 +720,22 @@ async function handleDefaultMouseUpOnTab({ lastMousedown, tab, event } = {}) {
         });
         break;
 
-      case 'group':
+      case TreeItem.TYPE_GROUP:
+        log(' => toggle group collapsed');
         await browser.tabGroups.update(tab.id, { collapsed: !tab.collapsed });
+        break;
+
+      case TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER:
+        log(' => toggle owner group collapsed');
+        await browser.tabGroups.update(tab.id, { collapsed: !tab.group.collapsed });
         break;
     }
   }
 
   if (lastMousedown.detail.isMiddleClick) { // Ctrl-click doesn't close tab on Firefox's tab bar!
     log(`onMouseUp: middle click on the tab ${tab.id}: targetType = `, lastMousedown.detail.targetType);
-    if (lastMousedown.detail.targetType != 'tab') // ignore middle click on blank area
+    if (lastMousedown.detail.targetType != 'tab' || // ignore middle click on blank area
+        tab.type == TreeItem.TYPE_GROUP_COLLAPSED_MEMBERS_COUNTER)
       return false;
     const tabs = TreeBehavior.getClosingTabsFromParent(tab, {
       byInternalOperation: true
