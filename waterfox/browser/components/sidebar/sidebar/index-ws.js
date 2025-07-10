@@ -15,8 +15,6 @@ import './tab-context-menu.js';
 import './tab-preview-tooltip.js';
 import './tab-preview.js';
 
-import * as EventUtils from './event-utils.js';
-
 RetrieveURL.registerFileURLResolver(async file => {
   return  file && browser.waterfoxBridge.getFileURL({
     lastModified: file.lastModified,
@@ -30,15 +28,6 @@ RetrieveURL.registerSelectionClipboardProvider({
   isAvailable: () => browser.waterfoxBridge.isSelectionClipboardAvailable(),
   getTextData: () => browser.waterfoxBridge.getSelectionClipboardContents(),
 });
-
-window.addEventListener('contextmenu', event => {
-  if (EventUtils.getEventTargetType(event) != 'blank')
-    return true;
-
-  event.stopImmediatePropagation();
-  event.preventDefault();
-  return false;
-}, { capture: true });
 
 // Deactivate tab tooltip for tab hover previews
 Tab.onCreated.addListener(tab => {
