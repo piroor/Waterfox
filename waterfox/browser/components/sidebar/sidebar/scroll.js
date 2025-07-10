@@ -719,11 +719,15 @@ function calculateScrollDeltaForItem(item, { over } = {}) {
 
   item = item.$TST.collapsed && item.$TST.nearestVisibleAncestorOrSelf || item;
 
-  const itemRect       = getItemRect(item, { afterAnimation: true });
-  const scrollBoxRect = Size.getScrollBoxRect(getScrollBoxFor(item, { allowFallback: true }));
+  const itemRect      = getItemRect(item, { afterAnimation: true });
+  const scrollBox     = getScrollBoxFor(item, { allowFallback: true });
+  const scrollBoxRect = Size.getScrollBoxRect(scrollBox);
   const overScrollOffset = over === false ?
     0 :
-    Math.ceil(itemRect.height / (item.pinned ? 3 : 2));
+    Math.ceil(Math.min(
+      itemRect.height / (item.pinned ? 3 : 2),
+      (scrollBoxRect.height - itemRect.height) / 3
+    ));
   let delta = 0;
   if (scrollBoxRect.bottom < itemRect.bottom) { // should scroll down
     delta = itemRect.bottom - scrollBoxRect.bottom + overScrollOffset;
@@ -880,21 +884,10 @@ export function scrollToNewTab(item, options = {}) {
 
 function canScrollToItem(item) {
   item = Tab.get(item?.id);
-  if (!TabsStore.ensureLivingItem(item) ||
-      item.hidden) {
-    return false;
-  }
-
-  // We should not produce any scrolling, when there is only one row.
-  // Otherwise such a scrolling will produce stressfull "shaking" of tabs.
-  // https://github.com/piroor/treestyletab/issues/3768
-  if (item.pinned) {
-    const rows = parseInt(document.documentElement.style.getPropertyValue('--pinned-tabs-rows') || '0');
-    return rows > 1;
-  }
-  else {
-    return Tab.getUnpinnedTabs(TabsStore.getCurrentWindowId()).length > 1;
-  }
+  return (
+    TabsStore.ensureLivingItem(item) &&
+    !item.hidden
+  );
 }
 
 export async function scrollToItem(item, options = {}) {
