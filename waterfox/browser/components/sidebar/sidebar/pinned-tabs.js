@@ -105,15 +105,18 @@ export function reposition(options = {}) {
   const allTabsAreaHeight   = Size.getAllTabsAreaSize() + GapCanceller.getOffset();
   mMaxVisibleRows = Math.max(1, Math.floor((allTabsAreaHeight * pinnedTabsAreaRatio) / height));
   mContentsHeight = height * maxRow + yOffset;
-  mAreaHeight = mFixedContainerHeight < 0 ?
-    Math.min(
-      mContentsHeight,
-      mMaxVisibleRows * height
-    ) :
-    Math.min(
-      mFixedContainerHeight,
-      allTabsAreaHeight * 0.9
-    );
+  mAreaHeight = Math.max(
+    height,
+    mFixedContainerHeight < 0 ?
+      Math.min(
+        mContentsHeight,
+        mMaxVisibleRows * height
+      ) :
+      Math.min(
+        mFixedContainerHeight,
+        allTabsAreaHeight * 0.9
+      )
+  );
   document.documentElement.style.setProperty('--pinned-tab-width', `${width}px`);
   document.documentElement.style.setProperty('--pinned-tabs-area-size', `${mAreaHeight}px`);
   if (configs.faviconizePinnedTabs && configs.maxFaviconizedPinnedTabsInOneRow > 0)
@@ -354,9 +357,12 @@ mContainerResizer.addEventListener('mouseup', event => {
   event.stopPropagation();
   event.preventDefault();
   document.releaseCapture();
-  mFixedContainerHeight = Math.min(
-    Math.max(0, mDragStartHeight + (event.clientY - mDragStartY)),
-    mContentsHeight
+  mFixedContainerHeight = Math.max(
+    getTabHeight(),
+    Math.min(
+      Math.max(0, mDragStartHeight + (event.clientY - mDragStartY)),
+      mContentsHeight
+    )
   );
   reposition();
   saveLastHeight();
